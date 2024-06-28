@@ -1,0 +1,49 @@
+version: '3.8'
+
+x-environment: &CLIENTBOTTLE_ENV
+  POSTGRES_USER: ${POSTGRES_USER}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  POSTGRES_DB: ${POSTGRES_DB}
+  POSTGRES_HOST: ${POSTGRES_HOST}
+  POSTGRES_PORT: ${POSTGRES_PORT}
+  VERSION: ${VERSION}
+  MODE: ${MODE}
+
+x-clientbottle-service: &CLIENTBOTTLE_SERVICE
+  build:
+    context: .
+    args:
+      VERSION: ${VERSION}
+  restart: always
+  depends_on:
+    - postgres
+  volumes:
+    - ./server:/app/server
+    - ./alembic:/app/alembic
+    - ./alembic.ini:/app/alembic.ini
+    - ./exec:/app/exec
+    - ./.tmp/volumes/tmp:/app/.tmp
+  networks:
+    - internal
+
+services:
+  postgres:
+    image: postgres:16.1
+    restart: always
+    volumes:
+      - ./.tmp/volumes/pg:/var/lib/postgresql/data
+    environment: *CLIENTBOTTLE_ENV
+    ports:
+      - "5432:5432"
+    networks:
+      - internal
+  api:
+    <<: *CLIENTBOTTLE_SERVICE
+    environment:
+      <<: *CLIENTBOTTLE_ENV
+      APP: api
+    ports:
+      - "7071:80"
+    
+networks:
+  internal:

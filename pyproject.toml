@@ -1,0 +1,48 @@
+[tool.poetry]
+name = "server"
+version = "0.1.0"
+description = ""
+authors = ["Matheus Braum <mbraum@preditiva.io>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+psycopg = "^3.1.18"
+fastapi = "^0.111.0"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.31"}
+uvicorn = {extras = ["standard"], version = "^0.30.1"}
+httpx = "^0.27.0"
+gunicorn = "^22.0.0"
+black = "^24.4.1"
+pre-commit = "^3.7.0"
+pytz = "^2024.1"
+pyyaml = "^6.0.1"
+pathspec = "^0.12.1"
+pytest = "^8.2.2"
+alembic = "^1.13.1"
+pydantic = "^2.7.1"
+pydantic-settings = "^2.2.1"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.4.1"
+ipykernel = "^6.29.4"
+pre-commit = "^3.7.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+exclude = '''
+/(
+    | .tmp
+    | .venv
+    | .vscode
+    | .git
+    | __pycache__
+    | .pytest_cache
+    | logs
+)/
+'''

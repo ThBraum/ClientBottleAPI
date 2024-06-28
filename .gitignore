@@ -1,0 +1,15 @@
+__pycache__/
+/sql/
+/log/
+/cron_job
+/.venv
+/secrets.env
+/.tmp
+/tmp
+build/
+/.env
+/socks_keys
+/.idea/
+.vscode*
+secrets/
+/secrets/.env
