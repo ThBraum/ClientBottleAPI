@@ -14,7 +14,7 @@ x-clientbottle-service: &CLIENTBOTTLE_SERVICE
     context: .
     args:
       VERSION: ${VERSION}
-  image: ${{ secrets.DOCKER_USERNAME }}/clientbottle:${VERSION}
+  image: thbraum/clientbottle:${VERSION}
   restart: always
   depends_on:
     - postgres
