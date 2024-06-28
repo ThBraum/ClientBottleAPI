@@ -46,6 +46,10 @@ jobs:
             --tag ${{ secrets.DOCKER_USERNAME }}/clientbottle:${{ env.VERSION }} \
             --push .
 
+      - name: Initialize Docker Swarm
+        run: |
+          docker swarm init || true
+
       - name: Deploy to Docker Swarm
         run: |
           docker stack deploy -c docker-compose.yml clientbottle
