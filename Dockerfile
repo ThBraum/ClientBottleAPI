@@ -24,7 +24,6 @@ COPY --from=poetry_base /app /app/
 COPY ./server /app/server
 COPY ./alembic /app/alembic
 COPY ./alembic.ini /app/alembic.ini
-COPY .env/ /app/.env/
 
 ARG DEV="LOCAL"
 ARG VERSION
