@@ -4,17 +4,16 @@ x-environment: &CLIENTBOTTLE_ENV
   POSTGRES_USER: ${POSTGRES_USER}
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
   POSTGRES_DB: ${POSTGRES_DB}
-  POSTGRES_HOST: ${POSTGRES_HOST}
-  POSTGRES_PORT: ${POSTGRES_PORT}
-  VERSION: ${VERSION}
-  MODE: ${MODE}
+  POSTGRES_HOST: "postgres"
+  POSTGRES_PORT: "5432"
+  MODE: ${MODE:-DEV}
+  VERSION: ${VERSION:-0.0.1}
 
 x-clientbottle-service: &CLIENTBOTTLE_SERVICE
   build:
     context: .
     args:
       VERSION: ${VERSION}
-  image: thbraum/clientbottle:${VERSION}
   restart: always
   depends_on:
     - postgres
@@ -24,27 +23,31 @@ x-clientbottle-service: &CLIENTBOTTLE_SERVICE
     - ./alembic.ini:/app/alembic.ini
     - ./exec:/app/exec
     - ./.tmp/volumes/tmp:/app/.tmp
+    # - type: bind
+    #   source: ${PWD}/.env
+    #   target: /app/.env
   networks:
     - internal
 
 services:
   postgres:
+    ports:
+      - "5531:5432"
     image: postgres:16.1
     restart: always
     volumes:
       - ./.tmp/volumes/pg:/var/lib/postgresql/data
     environment: *CLIENTBOTTLE_ENV
-    ports:
-      - "5432:5432"
     networks:
       - internal
+
   api:
+    ports:
+      - "7071:7071"
+    image: thbraum/clientbottle:${VERSION}
     <<: *CLIENTBOTTLE_SERVICE
     environment:
       <<: *CLIENTBOTTLE_ENV
-      APP: api
-    ports:
-      - "7071:80"
-    
 networks:
   internal:
+    # external: true

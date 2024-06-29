@@ -1,16 +1,16 @@
 #!/bin/bash
 
 HOST="0.0.0.0"
-PORT=80
+PORT=7071
 APP_NAME="server.__main__:app"
 
-GUNICORN_WORKERS=1
+GUNICORN_WORKERS=${GUNICORN_WORKERS:-4}
 
 
 MODE=${MODE^^}
 
 
-if [ "$MODE" = "PROD" ]; then
+if [ "$MODE" == "PROD" ]; then
     echo "Running in PROD mode"
     exec gunicorn \
         --bind "$HOST:$PORT" \

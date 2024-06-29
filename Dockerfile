@@ -21,13 +21,15 @@ RUN poetry install --only main
 FROM poetry_base
 
 COPY --from=poetry_base /app /app/
+COPY ./exec /app/exec
 COPY ./server /app/server
 COPY ./alembic /app/alembic
 COPY ./alembic.ini /app/alembic.ini
 
-ARG DEV="LOCAL"
 ARG VERSION
-ENV DEV_MODE=${DEV} APP_VERSION=${VERSION} APP="api"
+ARG MODE
+ENV VERSION=${VERSION}
+ENV MODE=${MODE}
 
 HEALTHCHECK CMD [ "bash", "/app/exec/healthcheck.sh" ]
 CMD [ "bash", "/app/exec/start.sh" ]

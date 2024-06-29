@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from server.configuration.environment import SETTINGS
 from server.configuration.middleware import ExceptionMiddleware
 from server.lib.exceptions import add_exception_handlers, add_http_exception_handlers
 from server.lib.logger import logger
@@ -35,7 +36,8 @@ def _get_app_args() -> dict:
     return dict(
         title="Bottle",
         description="Bottle API",
-        version="0.0.1",
+        root_path=SETTINGS.root_path,
+        version=SETTINGS.version,
         docs_url="/docs",
         redoc_url="/redoc",
         opeanpi_url="/openapi.json",

@@ -16,7 +16,7 @@ class Environment(BaseSettings):
     postgres_user: str
     postgres_password: str
     postgres_db: str
-    postgres_host: str
+    postgres_host: str = "localhost"
     postgres_port: int = 5432
 
     def render_sqlalchemy_url(self, dialect_and_connector: str):
@@ -37,9 +37,6 @@ class Environment(BaseSettings):
 
     @property
     def root_path(self):
-        if self.is_local_mode:
-            return ""
-        return "/_api"
-
+        return "/api" if self.is_local_mode else "/_api"
 
 SETTINGS = Environment()
