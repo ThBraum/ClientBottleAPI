@@ -24,7 +24,9 @@ class ContextWrapper(Generic[T]):
         return self.__value.get()
 
 
-logging_context: ContextWrapper[LoggingId] = ContextWrapper(ContextVar("server.lib.logger.logging_ctx"))
+logging_context: ContextWrapper[LoggingId] = ContextWrapper(
+    ContextVar("server.lib.logger.logging_ctx")
+)
 
 
 def set_user_id(user_id: int):

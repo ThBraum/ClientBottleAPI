@@ -10,7 +10,8 @@ from server.model.meta import Base
 # access to the values within the .ini file in use.
 config = context.config
 config.set_main_option(
-    "sqlalchemy.url", configuration.environment.SETTINGS.async_sqlalchemy_url.replace("%", "%%"),
+    "sqlalchemy.url",
+    configuration.environment.SETTINGS.async_sqlalchemy_url.replace("%", "%%"),
 )
 
 # Interpret the config file for Python logging.

@@ -1,5 +1,6 @@
 from enum import Enum
 from urllib.parse import quote_plus
+
 from pydantic_settings import BaseSettings
 
 
@@ -38,5 +39,6 @@ class Environment(BaseSettings):
     @property
     def root_path(self):
         return "/api" if self.is_local_mode else "/_api"
+
 
 SETTINGS = Environment()

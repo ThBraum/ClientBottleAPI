@@ -1,8 +1,9 @@
-from typing import Optional
 import uuid
+from typing import Optional
+
 from pydantic import BaseModel, Field
 from sqlalchemy import Integer, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.orm.base import Mapped
 
 from server.model.meta import Base, BaseEntity

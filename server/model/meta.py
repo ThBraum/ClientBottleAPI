@@ -1,11 +1,11 @@
 import datetime
 from typing import TYPE_CHECKING, Optional
-from sqlalchemy import Boolean, DateTime, ForeignKey, func, MetaData, text
-from sqlalchemy.orm import Mapped, DeclarativeBase, declared_attr, mapped_column, relationship
+
+from sqlalchemy import Boolean, DateTime, ForeignKey, MetaData, func, text
+from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column, relationship
 
 if TYPE_CHECKING:
     from server.model.user import User
-
 
 
 class Base(DeclarativeBase):
@@ -15,7 +15,7 @@ class Base(DeclarativeBase):
             "uq": "uq_%(table_name)s_%(column_0_name)s",
             "ck": "ck_%(table_name)s_%(constraint_name)s",
             "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-            "pk": "pk_%(table_name)s"
+            "pk": "pk_%(table_name)s",
         }
     )
 

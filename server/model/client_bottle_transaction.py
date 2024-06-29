@@ -1,5 +1,6 @@
 import datetime
 from typing import Optional
+
 from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.orm.base import Mapped
@@ -25,7 +26,6 @@ class ClientBottleTransaction(Base, BaseEntity):
         nullable=False,
     )
     recorded_by: Mapped[Optional[str]] = mapped_column(String)
-    
+
     rl_client: Mapped[Client] = relationship(foreign_keys=[id_client])
     rl_bottle: Mapped[Bottle] = relationship(foreign_keys=[id_bottle])
-    

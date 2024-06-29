@@ -1,11 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from server.configuration.environment import SETTINGS
 from server.configuration.middleware import ExceptionMiddleware
+from server.controller.auth_controller import router as auth_router
+from server.controller.server_controller import router as server_router
 from server.lib.exceptions import add_exception_handlers, add_http_exception_handlers
 from server.lib.logger import logger
-from server.controller.server_controller import router as server_router
-from server.controller.auth_controller import router as auth_router
 
 
 def init_app() -> FastAPI:

@@ -15,7 +15,6 @@ class CodigoErro(Enum):
     USUARIO_NAO_VINCULADO = (401, "Usuário não vinculado.")
     DS_LOGIN_JA_CADASTRADO = (458, "Login já cadastrado.")
     USUARIO_INATIVO = (401, "Conta inativa.")
-    
 
 
 class ClientBottleException(Exception):

@@ -1,6 +1,7 @@
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import JSONResponse
+
 from server.lib.error import ClientBottleException
 
 
