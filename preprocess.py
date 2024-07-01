@@ -4,7 +4,6 @@ import subprocess
 from copy import deepcopy
 from shlex import quote
 
-
 STACK_NAME = os.environ["STACK_NAME"]
 
 

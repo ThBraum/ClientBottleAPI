@@ -7,14 +7,25 @@ from fastapi.responses import JSONResponse
 
 @unique
 class CodigoErro(Enum):
-    EMAIL_JA_CADASTRADO = (452, "Email já cadastrado.")
-    ACESSO_NAO_PERMITIDO = (401, "Acesso não permitido.")
-    CREDENCIAIS_INVALIDAS = (401, "Credenciais inválidas.")
-    DS_LOGIN_NAO_ENCONTRADO = (401, "Login não encontrado.")
-    DS_CHAVE_BUSCA_NAO_ENCONTRADO = (456, "Chave de busca não encontrada.")
-    USUARIO_NAO_VINCULADO = (401, "Usuário não vinculado.")
-    DS_LOGIN_JA_CADASTRADO = (458, "Login já cadastrado.")
-    USUARIO_INATIVO = (401, "Conta inativa.")
+    EMAIL_JA_CADASTRADO = (409, "Email já cadastrado. Utilize um email diferente ou faça login.")
+    ACESSO_NAO_PERMITIDO = (403, "Acesso não permitido. Entre em contato com o suporte.")
+    CREDENCIAIS_INVALIDAS = (
+        401,
+        "Email e/ou senha incorretos. Verifique suas credenciais e tente novamente.",
+    )
+    DS_LOGIN_NAO_CADASTRADO = (
+        401,
+        "Conta não registrada. Verifique suas credenciais e tente novamente.",
+    )
+    DS_CHAVE_BUSCA_NAO_ENCONTRADO = (
+        404,
+        "Chave de busca não encontrada. Verifique a chave de busca e tente novamente.",
+    )
+    USUARIO_NAO_VINCULADO = (400, "Usuário não vinculado. Entre em contato com o suporte.")
+    USUARIO_INATIVO = (403, "Conta inativa. Entre em contato com o suporte.")
+    AUTENTICACAO_NECESSARIA = (401, "Autenticação necessária. Faça login para continuar.")
+    SESSAO_EXPIRADA_OU_INVALIDA = (401, "Sua sessão expirou ou é inválida. Faça login novamente")
+    SESSAO_EXPIRADA = (401, "Sua sessão expirou. Faça login novamente.")
 
 
 class ClientBottleException(Exception):

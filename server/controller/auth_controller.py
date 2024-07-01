@@ -1,17 +1,19 @@
-from fastapi import APIRouter, HTTPException
-from sqlalchemy.exc import SQLAlchemyError
+from fastapi import APIRouter, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 
-from server.configuration.database import DepDatabaseSession
 from server.lib.dependencies import DepUser
-from server.schema.auth_schema import UserLoginInput, UserLoginOutput
+from server.model.user import User
+from server.schema.auth_schema import AuthSigninOutput, UserLoginInput
 from server.service.auth_service import AuthService
 
+router = APIRouter(prefix="/server/auth", tags=["User"])
 
-router = APIRouter(prefix="/api/server", tags=["Auth"])
 
-@router.post("/login/", response_model=UserLoginOutput)
-async def exec_db(user: UserLoginInput, db: DepDatabaseSession, service: AuthService):
-    try:
-        return await service.authenticate(user)
-    except SQLAlchemyError as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@router.post("/login/", response_model=AuthSigninOutput)
+async def login(service: AuthService, form_data: OAuth2PasswordRequestForm = Depends()):
+    return await service.authenticate_user(form_data)
+
+
+@router.get("/me/")
+async def me(user: DepUser):
+    return user

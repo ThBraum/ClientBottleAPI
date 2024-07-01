@@ -1,16 +1,16 @@
 """Create functions
 
 Revision ID: 70768ce0faa5
-Revises: 
+Revises:
 Create Date: 2024-06-23 02:57:06.515447
 
 """
 
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "70768ce0faa5"

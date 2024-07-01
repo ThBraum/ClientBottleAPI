@@ -1,2 +1,2 @@
-from .database import DepDatabaseSession, AsyncSessionLocal
+from .database import AsyncSessionLocal, DepDatabaseSession
 from .environment import SETTINGS
