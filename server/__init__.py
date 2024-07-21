@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
+from fastapi.security import HTTPBearer, OAuth2PasswordBearer
 
 from server.configuration.environment import SETTINGS
 from server.configuration.middleware import ExceptionMiddleware, RemoveExpiredTokensMiddleware
@@ -7,6 +9,9 @@ from server.controller.auth_controller import router as auth_router
 from server.controller.server_controller import router as server_router
 from server.lib.exceptions import add_exception_handlers, add_http_exception_handlers
 from server.lib.logger import logger
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/server/auth/login/")
+security = HTTPBearer()
 
 
 def init_app() -> FastAPI:
@@ -19,14 +24,15 @@ def _init_fast_api_app() -> FastAPI:
     app = _config_app_exceptions(app)
     app = _config_app_middlewares(app)
     app = _config_app_routes(app)
+    app.openapi = lambda: _custom_openapi(app)
     return app
 
 
 def _config_app_routes(app: FastAPI) -> FastAPI:
     routers = [
         # Importar os routers aqui
-        server_router,
         auth_router,
+        server_router,
     ]
     for route in routers:
         app.include_router(route)
@@ -42,20 +48,35 @@ def _get_app_args() -> dict:
         docs_url="/docs",
         redoc_url="/redoc",
         openapi_url="/openapi.json",
-        openapi_tags=[{"name": "Auth", "description": "Auth endpoints"}],
-        openapi_components={
-            "securitySchemes": {
-                "OAuth2PasswordBearer": {
-                    "type": "oauth2",
-                    "flows": {
-                        "password": {
-                            "tokenUrl": "/server/auth/login/",
-                        }
-                    },
-                }
-            }
-        },
     )
+
+
+def _custom_openapi(app: FastAPI):
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="Bottle",
+        version="1.0.0",
+        description="Bottle API",
+        routes=app.routes,
+    )
+    openapi_schema["components"]["securitySchemes"] = {
+        "HTTPBearer": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+        },
+        "OAuth2PasswordBearer": {
+            "type": "oauth2",
+            "flows": {
+                "password": {
+                    "tokenUrl": "/server/auth/login/",
+                }
+            },
+        },
+    }
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
 
 
 def _config_app_exceptions(app: FastAPI) -> FastAPI:

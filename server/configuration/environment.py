@@ -4,7 +4,7 @@ from urllib.parse import quote_plus
 from pydantic_settings import BaseSettings
 
 
-class Mode(Enum):
+class Mode(str, Enum):
     LOCAL = "LOCAL"
     DEV = "DEV"
     PROD = "PROD"
@@ -39,6 +39,22 @@ class Environment(BaseSettings):
     @property
     def root_path(self):
         return "/api" if self.is_local_mode else "/_api"
+
+    class Config:
+        @classmethod
+        def customise_sources(cls, init_settings, env_settings, file_secret_settings):
+            return (
+                init_settings,
+                env_settings,
+                file_secret_settings,
+                cls._convert_env_values_to_upper,
+            )
+
+        @staticmethod
+        def _convert_env_values_to_upper(settings):
+            if "mode" in settings:
+                settings["mode"] = settings["mode"].upper()
+            return settings
 
 
 SETTINGS = Environment()

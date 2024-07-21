@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -18,18 +19,11 @@ class UserInfoOutput(BaseModel):
         from_attributes = True
 
 
-class TokenOutput(BaseModel):
-    token_type: str
-    access_token: str
-    expires_at: datetime
-
-    class Config:
-        from_attributes = True
-
-
 class AuthSigninOutput(BaseModel):
-    user: UserInfoOutput
-    token: TokenOutput
+    user: Optional[UserInfoOutput] = None
+    access_token: str
+    token_type: str
+    expires_at: datetime
 
     class Config:
         from_attributes = True

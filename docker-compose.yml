@@ -1,19 +1,23 @@
 version: '3.8'
 
 x-environment: &CLIENTBOTTLE_ENV
-  POSTGRES_USER: ${POSTGRES_USER}
-  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  POSTGRES_DB: ${POSTGRES_DB}
+  POSTGRES_USER: ${POSTGRES_USER:-postgres}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-example}
+  POSTGRES_DB: ${POSTGRES_DB:-clientbottle}
   POSTGRES_HOST: "postgres"
   POSTGRES_PORT: "5432"
-  MODE: ${MODE:-DEV}
+  MODE: ${MODE:-LOCAL}
   VERSION: ${VERSION:-0.0.1}
+  SECRET_KEY: ${SECRET_KEY:-empty}
+  ALGORITHM: ${ALGORITHM:-HS256}
 
 x-clientbottle-service: &CLIENTBOTTLE_SERVICE
   build:
     context: .
     args:
       VERSION: ${VERSION}
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
   restart: always
   depends_on:
     - postgres
@@ -23,9 +27,9 @@ x-clientbottle-service: &CLIENTBOTTLE_SERVICE
     - ./alembic.ini:/app/alembic.ini
     - ./exec:/app/exec
     - ./.tmp/volumes/tmp:/app/.tmp
-    # - type: bind
-    #   source: ${PWD}/.env
-    #   target: /app/.env
+    - type: bind
+      source: ${PWD}/.env
+      target: /app/.env
   networks:
     - internal
 

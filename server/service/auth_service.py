@@ -12,7 +12,7 @@ from server.lib.auth import (
 )
 from server.lib.error import ClientBottleException, CodigoErro
 from server.model.user import User
-from server.schema.auth_schema import AuthSigninOutput, TokenOutput, UserInfoOutput
+from server.schema.auth_schema import AuthSigninOutput, UserInfoOutput  # ,TokenOutput
 
 
 class _AuthService:
@@ -32,7 +32,12 @@ class _AuthService:
             username=user.username,
             email=user.email,
         )
-        return AuthSigninOutput(user=user_info, token=token)
+        return AuthSigninOutput(
+            user=user_info,
+            access_token=token.access_token,
+            token_type="bearer",
+            expires_at=token.expires_at,
+        )
 
 
 AuthService = Annotated[_AuthService, Depends(_AuthService)]

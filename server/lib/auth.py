@@ -6,7 +6,12 @@ from typing import Annotated, Optional
 import jwt
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import (
+    HTTPAuthorizationCredentials,
+    HTTPBearer,
+    OAuth2PasswordBearer,
+    OAuth2PasswordRequestForm,
+)
 from passlib.context import CryptContext
 from pytz import timezone
 from sqlalchemy import delete, select, text
@@ -16,7 +21,7 @@ from server.configuration.database import DepDatabaseSession
 from server.lib.error import ClientBottleException, CodigoErro
 from server.model.user import User
 from server.model.user_token import UserToken
-from server.schema.auth_schema import TokenOutput, UserTokenInfoOutput
+from server.schema.auth_schema import AuthSigninOutput, UserTokenInfoOutput
 
 env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
 load_dotenv(dotenv_path=env_path)
@@ -24,8 +29,14 @@ load_dotenv(dotenv_path=env_path)
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/server/auth/login/", scheme_name="Bearer")
+if not SECRET_KEY or not ALGORITHM:
+    raise ValueError(
+        f"SECRET_KEY and ALGORITHM must be set in the environment variables. SECRET_KEY = {SECRET_KEY} ALGORITHM = {ALGORITHM}"
+    )
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="server/auth/login/")
+security = HTTPBearer()
 
 timezone_brazil = timezone("America/Sao_Paulo")
 
@@ -45,13 +56,13 @@ def get_expiration_time() -> datetime:
 
 async def generate_unique_token(
     db: DepDatabaseSession, user: User, expires_at: datetime
-) -> TokenOutput:
+) -> AuthSigninOutput:
     while True:
         payload = {"sub": user.id_user, "exp": expires_at, "jti": str(uuid.uuid4())}
         token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
         existing_token = await db.execute(select(UserToken).where(UserToken.api_key == token))
         if not existing_token.scalar():
-            return TokenOutput(token_type="bearer", access_token=token, expires_at=expires_at)
+            return AuthSigninOutput(access_token=token, token_type="bearer", expires_at=expires_at)
 
 
 async def create_user_token(
@@ -112,36 +123,40 @@ async def get_user_by_id(
 
 
 async def get_current_user(
-    api_key: Annotated[str, Depends(oauth2_scheme)], db: DepDatabaseSession
-) -> Optional[UserTokenInfoOutput]:
+    db: DepDatabaseSession,
+    token: Annotated[Optional[str], Depends(oauth2_scheme)] = None,
+    http_credentials: Annotated[Optional[HTTPAuthorizationCredentials], Depends(security)] = None,
+) -> UserTokenInfoOutput:
     try:
-        payload = jwt.decode(api_key, SECRET_KEY, algorithms=[ALGORITHM])
+        credentials = None
+        if http_credentials and http_credentials.credentials != "undefined":
+            credentials = http_credentials.credentials
+        elif token and token != "undefined":
+            credentials = token
+        if not credentials:
+            raise ClientBottleException(errors=[CodigoErro.AUTENTICACAO_NECESSARIA])
+
+        payload = jwt.decode(credentials, SECRET_KEY, algorithms=[ALGORITHM])
         id_user: int = payload.get("sub")
         if id_user is None:
             raise ClientBottleException(errors=[CodigoErro.AUTENTICACAO_NECESSARIA])
-        return await get_user_by_id(db, id_user, api_key)
-    except jwt.InvalidTokenError as e:
-        raise ClientBottleException(
-            errors=[CodigoErro.CREDENCIAIS_INVALIDAS], status_code=401
-        ) from e
-    except ClientBottleException as e:
-        raise HTTPException(
-            status_code=e.status_code,
-            detail=e.errors,
-            headers={"WWW-Authenticate": "Bearer"},
-        ) from e
+        return await get_user_by_id(db, id_user, credentials)
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error",
-            headers={"WWW-Authenticate": "Bearer"},
-        ) from e
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
+        )
 
 
 async def get_current_active_user(
-    db: DepDatabaseSession, token: Annotated[str, Depends(oauth2_scheme)]
+    db: DepDatabaseSession,
+    token: Annotated[Optional[str], Depends(oauth2_scheme)] = None,
+    http_credentials: Annotated[Optional[HTTPAuthorizationCredentials], Depends(security)] = None,
 ) -> User:
-    current_user = await get_current_user(token, db)
+    current_user = await get_current_user(db, token, http_credentials)
     if not current_user.fl_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user

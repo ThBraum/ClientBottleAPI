@@ -28,8 +28,13 @@ COPY ./alembic.ini /app/alembic.ini
 
 ARG VERSION
 ARG MODE
+ARG SECRET_KEY
+ARG ALGORITHM
+
 ENV VERSION=${VERSION}
 ENV MODE=${MODE}
+ENV SECRET_KEY=${SECRET_KEY}
+ENV ALGORITHM=${ALGORITHM}
 
 HEALTHCHECK CMD [ "bash", "/app/exec/healthcheck.sh" ]
 CMD [ "bash", "/app/exec/start.sh" ]
