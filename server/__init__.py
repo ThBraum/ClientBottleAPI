@@ -104,6 +104,4 @@ def _config_app_middlewares(app: FastAPI) -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    # app.add_middleware(ExceptionMiddleware)
-    # app.add_middleware(RemoveExpiredTokensMiddleware)
     return app
