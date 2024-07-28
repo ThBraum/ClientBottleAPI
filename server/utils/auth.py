@@ -14,14 +14,13 @@ from fastapi.security import (
 )
 from passlib.context import CryptContext
 from pytz import timezone
-from sqlalchemy import delete, select, text
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from server.configuration.database import DepDatabaseSession
-from server.lib.error import ClientBottleException, CodigoErro
 from server.model.user import User
-from server.model.user_token import UserToken
-from server.schema.auth_schema import AuthSigninOutput, UserTokenInfoOutput
+from server.schema.auth_schema import AuthSigninOutput, TokenLoginOutput, UserTokenInfoOutput
+from server.utils.error import ClientBottleException, CodigoErro
 
 env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
 load_dotenv(dotenv_path=env_path)
@@ -30,9 +29,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
 
 if not SECRET_KEY or not ALGORITHM:
-    raise ValueError(
-        f"SECRET_KEY and ALGORITHM must be set in the environment variables. SECRET_KEY = {SECRET_KEY} ALGORITHM = {ALGORITHM}"
-    )
+    raise ValueError("SECRET_KEY and ALGORITHM must be set in the environment variables.")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="server/auth/login/")
@@ -54,24 +51,21 @@ def get_expiration_time() -> datetime:
     return datetime.combine((now + timedelta(days=1)), time(3, 0), tzinfo=timezone_brazil)
 
 
-async def generate_unique_token(
-    db: DepDatabaseSession, user: User, expires_at: datetime
-) -> AuthSigninOutput:
-    while True:
-        payload = {"sub": user.id_user, "exp": expires_at, "jti": str(uuid.uuid4())}
-        token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
-        existing_token = await db.execute(select(UserToken).where(UserToken.api_key == token))
-        if not existing_token.scalar():
-            return AuthSigninOutput(access_token=token, token_type="bearer", expires_at=expires_at)
-
-
-async def create_user_token(
-    db: DepDatabaseSession, user: User, api_key: str, expires_at: datetime
-) -> UserToken:
-    user_token = UserToken(id_user=user.id_user, api_key=api_key, expires_at=expires_at)
-    db.add(user_token)
-    await db.commit()
-    return user_token
+async def generate_token(user: User, expires_at: datetime) -> Optional[TokenLoginOutput]:
+    payload = {
+        "id_user": user.id_user,
+        "username": user.username,
+        "email": user.email,
+        "full_name": user.full_name,
+        "role": user.role,
+        "fl_active": user.fl_active,
+        "creation_user_id": user.creation_user_id,
+        "created_at": int(user.created_at.timestamp()),
+        "jti": str(uuid.uuid4()),
+        "exp": int(expires_at.timestamp()),
+    }
+    token_jwt = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    return TokenLoginOutput(token_type="bearer", access_token=token_jwt)
 
 
 async def get_user_by_email_or_username(
@@ -122,46 +116,6 @@ async def get_user_by_id(
         raise ClientBottleException(errors=[CodigoErro.SESSAO_EXPIRADA_OU_INVALIDA])
 
 
-async def get_current_user(
-    db: DepDatabaseSession,
-    token: Annotated[Optional[str], Depends(oauth2_scheme)] = None,
-    http_credentials: Annotated[Optional[HTTPAuthorizationCredentials], Depends(security)] = None,
-) -> UserTokenInfoOutput:
-    try:
-        credentials = None
-        if http_credentials and http_credentials.credentials != "undefined":
-            credentials = http_credentials.credentials
-        elif token and token != "undefined":
-            credentials = token
-        if not credentials:
-            raise ClientBottleException(errors=[CodigoErro.AUTENTICACAO_NECESSARIA])
-
-        payload = jwt.decode(credentials, SECRET_KEY, algorithms=[ALGORITHM])
-        id_user: int = payload.get("sub")
-        if id_user is None:
-            raise ClientBottleException(errors=[CodigoErro.AUTENTICACAO_NECESSARIA])
-        return await get_user_by_id(db, id_user, credentials)
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
-        )
-
-
-async def get_current_active_user(
-    db: DepDatabaseSession,
-    token: Annotated[Optional[str], Depends(oauth2_scheme)] = None,
-    http_credentials: Annotated[Optional[HTTPAuthorizationCredentials], Depends(security)] = None,
-) -> User:
-    current_user = await get_current_user(db, token, http_credentials)
-    if not current_user.fl_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user
-
-
 async def validate_credentials(
     db: AsyncSession, form_data: OAuth2PasswordRequestForm
 ) -> Optional[User]:
@@ -169,9 +123,3 @@ async def validate_credentials(
     if not verify_password(form_data.password, user.password):
         raise ClientBottleException(errors=[CodigoErro.CREDENCIAIS_INVALIDAS], status_code=401)
     return user
-
-
-async def remove_expired_tokens(db: DepDatabaseSession):
-    now = datetime.now(timezone_brazil)
-    await db.execute(delete(UserToken).where(UserToken.expires_at <= now))
-    await db.commit()

@@ -1,4 +1,5 @@
 import uuid
+from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel, Field
@@ -7,6 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.orm.base import Mapped
 
 from server.model.meta import Base, BaseEntity
+from server.model.role import UserRole
 
 
 class LoggingId(BaseModel):
@@ -22,4 +24,4 @@ class User(Base, BaseEntity):
     email: Mapped[str] = mapped_column(String, unique=True)
     password: Mapped[str] = mapped_column(String)
     full_name: Mapped[str] = mapped_column(String)
-    api_key: Mapped[Optional[str]] = mapped_column(String)
+    role: Mapped[UserRole] = mapped_column(default=UserRole.USER)

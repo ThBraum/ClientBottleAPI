@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from server.lib.error import ClientBottleException
+from server.utils.error import ClientBottleException
 
 
 class ApiBaseException(HTTPException):
@@ -12,7 +12,7 @@ class ApiBaseException(HTTPException):
         self.status_code = status_code
         self.detail = detail
         if self.detail:
-            from server.lib.logger import logger
+            from server.utils.logger import logger
 
             logger.exception(self.detail)
 

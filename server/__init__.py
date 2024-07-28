@@ -4,11 +4,11 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.security import HTTPBearer, OAuth2PasswordBearer
 
 from server.configuration.environment import SETTINGS
-from server.configuration.middleware import ExceptionMiddleware, RemoveExpiredTokensMiddleware
 from server.controller.auth_controller import router as auth_router
 from server.controller.server_controller import router as server_router
-from server.lib.exceptions import add_exception_handlers, add_http_exception_handlers
-from server.lib.logger import logger
+from server.utils.exceptions import add_exception_handlers, add_http_exception_handlers
+from server.utils.handler import setup_marketplace_exception_handling
+from server.utils.logger import logger
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/server/auth/login/")
 security = HTTPBearer()
@@ -21,10 +21,11 @@ def init_app() -> FastAPI:
 def _init_fast_api_app() -> FastAPI:
     logger.info("Iniciando ClientBottle FastAPI")
     app = FastAPI(**_get_app_args())
+    app = _config_app_routes(app)
     app = _config_app_exceptions(app)
     app = _config_app_middlewares(app)
-    app = _config_app_routes(app)
     app.openapi = lambda: _custom_openapi(app)
+    setup_marketplace_exception_handling(app)
     return app
 
 
@@ -103,6 +104,4 @@ def _config_app_middlewares(app: FastAPI) -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    app.add_middleware(ExceptionMiddleware)
-    app.add_middleware(RemoveExpiredTokensMiddleware)
     return app

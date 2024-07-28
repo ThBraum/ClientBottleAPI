@@ -25,7 +25,7 @@ class ContextWrapper(Generic[T]):
 
 
 logging_context: ContextWrapper[LoggingId] = ContextWrapper(
-    ContextVar("server.lib.logger.logging_ctx")
+    ContextVar("server.utils.logger.logging_ctx")
 )
 
 

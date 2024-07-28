@@ -4,15 +4,10 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
 from server.configuration.database import DepDatabaseSession
-from server.lib.auth import (
-    create_user_token,
-    generate_unique_token,
-    get_expiration_time,
-    validate_credentials,
-)
-from server.lib.error import ClientBottleException, CodigoErro
 from server.model.user import User
-from server.schema.auth_schema import AuthSigninOutput, UserInfoOutput  # ,TokenOutput
+from server.schema.auth_schema import AuthSigninOutput, UserInfoOutput
+from server.utils.auth import generate_token, get_expiration_time, validate_credentials
+from server.utils.error import ClientBottleException, CodigoErro
 
 
 class _AuthService:
@@ -23,8 +18,7 @@ class _AuthService:
         user = await validate_credentials(self.db, form_data)
 
         expires_at = get_expiration_time()
-        token = await generate_unique_token(self.db, user, expires_at)
-        await create_user_token(self.db, user, token.access_token, token.expires_at)
+        token = await generate_token(user, expires_at)
 
         user_info = UserInfoOutput(
             id_user=user.id_user,
@@ -36,7 +30,7 @@ class _AuthService:
             user=user_info,
             access_token=token.access_token,
             token_type="bearer",
-            expires_at=token.expires_at,
+            expires_at=expires_at,
         )
 
 
