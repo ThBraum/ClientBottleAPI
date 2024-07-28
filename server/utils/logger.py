@@ -5,7 +5,7 @@ from logging.handlers import TimedRotatingFileHandler
 
 import pytz
 
-from server.lib.terminalutils import text_colored
+from server.utils.terminalutils import text_colored
 
 
 def setup_logging():

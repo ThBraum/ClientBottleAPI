@@ -3,11 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
-from server.lib.auth import get_current_active_user
-from server.lib.dependencies import DepUser
 from server.model.user import User
 from server.schema.auth_schema import AuthSigninOutput, UserLoginInput
 from server.service.auth_service import AuthService
+from server.utils.dependencies import DepUserPayload
 
 router = APIRouter(prefix="/server/auth", tags=["Auth"])
 
@@ -18,5 +17,5 @@ async def login(service: AuthService, form_data: OAuth2PasswordRequestForm = Dep
 
 
 @router.get("/me/", summary="Get Current User")
-async def me(user: DepUser):
+async def me(user: DepUserPayload):
     return user

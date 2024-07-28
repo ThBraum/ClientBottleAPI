@@ -16,13 +16,13 @@ Rotas chamadas pelo admin:
         Passo a passo:
             1. invite_token = uuid4()
             2. Insert Invite(
-                token=invite_token, 
-                email=request.email, 
-                role=request.role, 
+                token=invite_token,
+                email=request.email,
+                role=request.role,
                 sender_id=current_user.id,
                 expires_at=now() + 24h
             )
-            3. Enviar email contendo link: 
+            3. Enviar email contendo link:
                 <url-frontend>/users/invite/?token=<invite_token> #tela frontend, não endpoint!
 
     DELETE /users/invite/?token=<invite_id>
@@ -55,7 +55,7 @@ Rotas chamadas pelo novo usuário:
         }
 
         Passo a passo:
-            1. Procurar no banco algum Invite com token=<invite_token> and expires_at < now() 
+            1. Procurar no banco algum Invite com token=<invite_token> and expires_at < now()
             2. Insert User(
                 email=invite.email,
                 role=invite.role,
@@ -64,4 +64,3 @@ Rotas chamadas pelo novo usuário:
                 password=bcrypt(request.password)
             )
             3. Deletar Invite
-

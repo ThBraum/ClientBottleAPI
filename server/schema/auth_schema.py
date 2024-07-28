@@ -40,3 +40,11 @@ class UserTokenInfoOutput(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class TokenLoginOutput(BaseModel):
+    token_type: str
+    access_token: str
+
+    class Config:
+        from_attributes = True
