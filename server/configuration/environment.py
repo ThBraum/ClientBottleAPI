@@ -20,6 +20,11 @@ class Environment(BaseSettings):
     postgres_host: str = "localhost"
     postgres_port: int = 5432
 
+    smtp_user: str
+    smtp_password: str
+    smtp_host: str
+    smtp_port: int
+
     def render_sqlalchemy_url(self, dialect_and_connector: str):
         user = quote_plus(self.postgres_user)
         password = quote_plus(self.postgres_password)

@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 x-environment: &CLIENTBOTTLE_ENV
   POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -10,13 +10,16 @@ x-environment: &CLIENTBOTTLE_ENV
   VERSION: ${VERSION:-0.0.1}
   SECRET_KEY: ${SECRET_KEY:-empty}
   ALGORITHM: ${ALGORITHM:-HS256}
+  SMTP_USER: ${SMTP_USER:-clientbottle.noreply@gmail.com}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+  SMTP_HOST: ${SMTP_HOST:-smtp4dev}
+  SMTP_PORT: ${SMTP_PORT:-25}
 
 x-clientbottle-service: &CLIENTBOTTLE_SERVICE
   build:
     context: .
     args:
       VERSION: ${VERSION}
-      SECRET_KEY: ${SECRET_KEY}
       ALGORITHM: ${ALGORITHM}
   restart: always
   depends_on:
@@ -52,6 +55,14 @@ services:
     <<: *CLIENTBOTTLE_SERVICE
     environment:
       <<: *CLIENTBOTTLE_ENV
+
+  smtp4dev:
+    image: rnwood/smtp4dev:v3
+    ports:
+      - "7073:80"
+    networks:
+      - internal
+
 networks:
   internal:
     # external: true

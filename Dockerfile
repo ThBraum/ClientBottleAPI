@@ -18,7 +18,7 @@ RUN pip install "poetry==$POETRY_VERSION" && \
 COPY ./pyproject.toml ./poetry.lock ./
 RUN poetry install --only main
 
-FROM poetry_base
+FROM python_base
 
 COPY --from=poetry_base /app /app/
 COPY ./exec /app/exec
@@ -28,12 +28,10 @@ COPY ./alembic.ini /app/alembic.ini
 
 ARG VERSION
 ARG MODE
-ARG SECRET_KEY
 ARG ALGORITHM
 
 ENV VERSION=${VERSION}
 ENV MODE=${MODE}
-ENV SECRET_KEY=${SECRET_KEY}
 ENV ALGORITHM=${ALGORITHM}
 
 HEALTHCHECK CMD [ "bash", "/app/exec/healthcheck.sh" ]
