@@ -5,6 +5,7 @@ from fastapi.security import HTTPBearer, OAuth2PasswordBearer
 
 from server.configuration.environment import SETTINGS
 from server.controller.auth_controller import router as auth_router
+from server.controller.invite_controller import router as invite_router
 from server.controller.server_controller import router as server_router
 from server.utils.exceptions import add_exception_handlers, add_http_exception_handlers
 from server.utils.handler import setup_marketplace_exception_handling
@@ -33,6 +34,7 @@ def _config_app_routes(app: FastAPI) -> FastAPI:
     routers = [
         # Importar os routers aqui
         auth_router,
+        invite_router,
         server_router,
     ]
     for route in routers:

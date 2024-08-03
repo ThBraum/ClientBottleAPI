@@ -1,0 +1,58 @@
+<mjml>
+  <mj-head>
+    <mj-title>Bem Vindo ao ClientBottle!</mj-title>
+    <mj-attributes>
+      <mj-text color="#525252" />
+    </mj-attributes>
+    <mj-style>
+      @media only screen and (max-width: 480px) {
+        .mj-column-per-100 {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+      }
+    </mj-style>
+  </mj-head>
+
+  <mj-body>
+    <mj-section background-size="cover" background-url="https://postimg.cc/H8WdNd92" padding="0px">
+      <mj-column width="100%">
+        <mj-text font-size="20px" font-weight="300" color="#a0a0a0" align="center">
+          ClientBottle
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#fafafa" padding="20px">
+      <mj-column width="100%">
+        <mj-text font-style="italic" font-size="20px" font-family="Helvetica Neue" align="center">
+          Bem Vindo ao ClientBottle!
+        </mj-text>
+
+        <mj-text align="center">
+          Estamos muito felizes por tê-lo conosco. Para concluir o seu cadastro
+          e acessar a plataforma, pedimos que acesse o link:
+        </mj-text>
+
+        <mj-button background-color="#1ab394" href="$link_botao" width="200px">
+          Concluir Cadastro
+        </mj-button>
+
+        <mj-text align="center">
+          Atenciosamente,<br />
+          Equipe ClientBottle.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#f0f0f0" padding="10px">
+      <mj-column width="100%">
+        <mj-text font-size="12px" align="center">
+          <strong>Aviso.</strong> Este é um e-mail automático. Em caso de dúvidas, entre em contato por
+          meio do endereço
+          <a href="mailto:suporte.clientbottle@gmail.com">suporte.clientbottle@gmail.com</a>.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
