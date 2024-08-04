@@ -17,8 +17,8 @@
   <mj-body>
     <mj-section background-size="cover" padding="0px">
       <mj-column width="100%" background-color="white">
-        <mj-text font-size="20px" font-weight="300" color="#030303" align="center">
-        ClientBottle
+        <mj-text font-size="18px" font-weight="300" color="#030303" align="center">
+        <strong> ClientBottle </strong>
         </mj-text>
       </mj-column>
     </mj-section>
@@ -43,7 +43,7 @@
       <mj-column width="100%">
         <mj-text align="center">
           Atenciosamente,<br />
-          Equipe ClientBottle.
+          ClientBottle.
         </mj-text>
       </mj-column>
     </mj-section>
