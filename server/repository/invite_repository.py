@@ -49,6 +49,13 @@ class _InviteRepository:
         self.logger.info(f"Invite found for token {token}")
         return invite
 
+    async def get_invite_by_id(self, id_invite: int):
+        self.logger.info(f"Getting invite by id = {id_invite}")
+        result = await self.db.execute(select(Invite).where(Invite.id_invite == id_invite))
+        invite = result.scalars().one_or_none()
+        self.logger.info(f"Invite found for id {id_invite}")
+        return invite
+
     async def get_all_invites_by_sender(self, sender_id: int):
         self.logger.info(f"Getting all invites by sender id = {sender_id}")
         result = await self.db.execute(select(Invite).where(Invite.sender_id == sender_id))
@@ -69,6 +76,13 @@ class _InviteRepository:
         await self.db.refresh(user)
         self.logger.info(f"User created {user.email}")
         return user
+
+    async def get_sended_invites(self, sender_id: int):
+        self.logger.info(f"Getting sended invites by sender id = {sender_id}")
+        result = await self.db.execute(select(Invite).where(Invite.sender_id == sender_id))
+        invites = result.scalars().all()
+        self.logger.info(f"Invites found for sender id = {sender_id}")
+        return invites
 
 
 InviteRepository = Annotated[_InviteRepository, Depends(_InviteRepository)]
