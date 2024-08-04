@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from typing import Annotated, Optional
 
 import jwt
@@ -46,5 +48,19 @@ async def get_user_payload(decoded_token: dict = Depends(auth_dependency)) -> Se
     return SessionPayload.model_validate(decoded_token)
 
 
+async def is_admin(decoded_token: dict = Depends(auth_dependency)) -> SessionPayload:
+    if decoded_token.get("role") != "ADMINISTRATOR":
+        raise ClientBottleException([CodigoErro.ADMIN_ONLY])
+    return SessionPayload.model_validate(decoded_token)
+
+
 AUTH_DEPENDENCY = Depends(auth_dependency)
+
+UTILS_FOLDER_PATH = Path(__file__).parent
+if os.path.exists("/app"):
+    ROOT_FOLDER_PATH = Path("/app")
+else:
+    ROOT_FOLDER_PATH = UTILS_FOLDER_PATH.parent
+
 DepUserPayload = Annotated[SessionPayload, Depends(get_user_payload)]
+DepUserAdminPayload = Annotated[SessionPayload, Depends(is_admin)]

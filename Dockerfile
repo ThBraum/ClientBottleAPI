@@ -18,9 +18,24 @@ RUN pip install "poetry==$POETRY_VERSION" && \
 COPY ./pyproject.toml ./poetry.lock ./
 RUN poetry install --only main
 
+FROM node:21.6.1-bullseye AS template_builder
+
+WORKDIR /templates/email
+RUN npm install mjml
+COPY ./templates /templates
+
+RUN mkdir /build && \
+    for template in *.mjml; do \
+        npx mjml $template \
+            --config.minify true \
+            --config.minifyOptions='{"minifyCSS": true, "removeEmptyAttributes": true}' \
+            > /build/$(basename $template .mjml).html; \
+    done
+
 FROM python_base
 
 COPY --from=poetry_base /app /app/
+COPY --from=template_builder /build /app/templates/email
 COPY ./exec /app/exec
 COPY ./server /app/server
 COPY ./alembic /app/alembic

@@ -51,6 +51,13 @@ def get_expiration_time() -> datetime:
     return datetime.combine((now + timedelta(days=1)), time(3, 0), tzinfo=timezone_brazil)
 
 
+async def evaluate_username_availability(db: DepDatabaseSession, username: str) -> str:
+    result = await db.execute(select(User).where(User.username == username))
+    if result.scalars().first():
+        raise ClientBottleException(errors=[CodigoErro.USERNAME_IN_USE])
+    return username
+
+
 async def generate_token(user: User, expires_at: datetime) -> Optional[TokenLoginOutput]:
     payload = {
         "id_user": user.id_user,

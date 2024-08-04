@@ -20,10 +20,16 @@ class Environment(BaseSettings):
     postgres_host: str = "localhost"
     postgres_port: int = 5432
 
+    secret_key: str
+    algorithm: str
+    auth_api_origin: str
+
     smtp_user: str
     smtp_password: str
     smtp_host: str
     smtp_port: int
+
+    frontend_url: str
 
     def render_sqlalchemy_url(self, dialect_and_connector: str):
         user = quote_plus(self.postgres_user)
@@ -60,6 +66,8 @@ class Environment(BaseSettings):
             if "mode" in settings:
                 settings["mode"] = settings["mode"].upper()
             return settings
+
+        env_file = ".env"
 
 
 SETTINGS = Environment()

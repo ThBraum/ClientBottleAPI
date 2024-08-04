@@ -18,6 +18,10 @@ class CodigoErro(Enum):
     TOKEN_INVALIDO = 1009
     SESSAO_EXPIRADA_OU_INVALIDA = 1010
     SESSAO_EXPIRADA = 1011
+    ADMIN_ONLY = 1012
+    INVALID_INVITE = 1013
+    EXPIRED_INVITE = 1014
+    USERNAME_IN_USE = 1015
 
 
 MAP_ERRO_PARA_HTTP_STATUS = {
@@ -32,6 +36,10 @@ MAP_ERRO_PARA_HTTP_STATUS = {
     CodigoErro.TOKEN_INVALIDO: status.HTTP_401_UNAUTHORIZED,
     CodigoErro.SESSAO_EXPIRADA_OU_INVALIDA: status.HTTP_401_UNAUTHORIZED,
     CodigoErro.SESSAO_EXPIRADA: status.HTTP_401_UNAUTHORIZED,
+    CodigoErro.ADMIN_ONLY: status.HTTP_403_FORBIDDEN,
+    CodigoErro.INVALID_INVITE: status.HTTP_401_UNAUTHORIZED,
+    CodigoErro.EXPIRED_INVITE: status.HTTP_401_UNAUTHORIZED,
+    CodigoErro.USERNAME_IN_USE: status.HTTP_409_CONFLICT,
 }
 
 MAP_ERRO_PARA_MENSAGEM = {
@@ -46,11 +54,17 @@ MAP_ERRO_PARA_MENSAGEM = {
     CodigoErro.TOKEN_INVALIDO: "Token inválido. Faça login novamente.",
     CodigoErro.SESSAO_EXPIRADA_OU_INVALIDA: "Sua sessão expirou ou é inválida. Faça login novamente",
     CodigoErro.SESSAO_EXPIRADA: "Sua sessão expirou. Faça login novamente.",
+    CodigoErro.ADMIN_ONLY: "Acesso restrito a administradores. Entre em contato com o suporte.",
+    CodigoErro.INVALID_INVITE: "Convite inválido. Entre em contato com o suporte.",
+    CodigoErro.EXPIRED_INVITE: "Convite expirado. Entre em contato com o suporte.",
+    CodigoErro.USERNAME_IN_USE: "Nome de usuário já em uso. Escolha um nome de usuário diferente.",
 }
 
 
 class ClientBottleException(Exception):
-    def __init__(self, errors: List[CodigoErro], status_code: int | None = None):
+    def __init__(self, errors: List[CodigoErro] | CodigoErro, status_code: int | None = None):
+        if not isinstance(errors, list):
+            errors = [errors]
         self.errors = errors
         self.status_code = self.__http_from_errors(errors) if status_code is None else status_code
 

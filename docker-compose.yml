@@ -18,6 +18,8 @@ x-environment: &CLIENTBOTTLE_ENV
   SMTP_HOST: ${SMTP_HOST:-smtp4dev}
   SMTP_PORT: ${SMTP_PORT:-25}
 
+  FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+
 x-clientbottle-service: &CLIENTBOTTLE_SERVICE
   build:
     context: .
