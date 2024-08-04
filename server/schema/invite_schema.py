@@ -1,7 +1,8 @@
 import re
+from typing import Optional
 
 from fastapi import HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, model_validator
 
 from server.model.role import UserRole
 
@@ -31,3 +32,35 @@ class UserCreated(BaseModel):
     email: str
     role: UserRole
     fl_active: bool = True
+
+
+class RecoverPasswordSchema(BaseModel):
+    email: Optional[str] = Field(None)
+    username: Optional[str] = Field(None)
+
+    @model_validator(mode="before")
+    @classmethod
+    def at_least_one(cls, values):
+        email = values.get("email")
+        username = values.get("username")
+        if not email and not username:
+            raise HTTPException(
+                status_code=400,
+                detail="Pelo menos um dos campos 'email' ou 'username' deve ser fornecido.",
+            )
+        return values
+
+    @model_validator(mode="after")
+    @classmethod
+    def check_email(cls, values):
+        email = values.email
+        if email and not EMAIL_REGEX.match(email):
+            raise HTTPException(
+                status_code=400,
+                detail="Formato de email inválido. Siga o padrão 'example@gmail.com'.",
+            )
+        return values
+
+
+class NewHashedPassword(BaseModel):
+    new_password: str

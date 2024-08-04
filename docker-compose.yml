@@ -35,9 +35,6 @@ x-clientbottle-service: &CLIENTBOTTLE_SERVICE
     - ./alembic.ini:/app/alembic.ini
     - ./exec:/app/exec
     - ./.tmp/volumes/tmp:/app/.tmp
-    - type: bind
-      source: ${PWD}/.env
-      target: /app/.env
   networks:
     - internal
 

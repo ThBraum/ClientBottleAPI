@@ -1,11 +1,17 @@
 from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Query
+from fastapi import APIRouter, BackgroundTasks, Body, Query
 from fastapi.responses import JSONResponse
 
 from server.model.role import UserRole
-from server.schema.invite_schema import InviteCreate, UserCreate, UserCreated
+from server.schema.invite_schema import (
+    InviteCreate,
+    NewHashedPassword,
+    RecoverPasswordSchema,
+    UserCreate,
+    UserCreated,
+)
 from server.service.auth_service import AuthService
 from server.service.invite_service import InviteService
 from server.utils.dependencies import DepUserAdminPayload
@@ -55,3 +61,28 @@ async def delete_invite(
     id_invite: Optional[int] = Query(None),
 ):
     return await service.delete_invite_by_token_or_id_invite(token, id_invite)
+
+
+@router.post("/user/recover-password", summary="Send recover password", tags=["Recover Password"])
+async def recover_password(
+    service: InviteService,
+    background: BackgroundTasks,
+    email_or_username: RecoverPasswordSchema = Body(...),
+):
+    await service.post_recover_password(email_or_username, background)
+    return JSONResponse(
+        status_code=200,
+        content={"message": "Se esse usuário foi encontrado, enviamos para o email cadastrado."},
+    )
+
+
+@router.patch(
+    "/user/recover-password", summary="Confirm recover password", tags=["Recover Password"]
+)
+async def confirm_recover_password(
+    new_password: NewHashedPassword,
+    service: InviteService,
+    token: UUID = Query(...),
+):
+    await service.confirm_new_hashed_password(token, new_password.new_password)
+    return JSONResponse(status_code=200, content={"message": "Senha atualizada."})

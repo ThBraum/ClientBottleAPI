@@ -18,18 +18,18 @@
     <mj-section background-size="cover" padding="0px">
       <mj-column width="100%" background-color="white">
         <mj-text font-size="18px" font-weight="300" color="#030303" align="center">
-        <strong> ClientBottle </strong>
+        <strong font-style="italic"> ClientBottle </strong>
         </mj-text>
       </mj-column>
     </mj-section>
 
     <mj-section background-color="#edfcfc" padding="20px">
       <mj-column width="100%">
-        <mj-text font-style="italic" font-size="20px" font-family="Helvetica Neue" align="center">
+        <mj-text font-style="italic" font-size="20px" font-family="Helvetica Neue">
           Bem Vindo ao ClientBottle!
         </mj-text>
 
-        <mj-text align="center">
+        <mj-text>
           Estamos muito contentes por tê-lo conosco. Para finalizar seu cadastro e acessar a plataforma, por favor, clique no botão abaixo:
         </mj-text>
 
@@ -41,7 +41,7 @@
 
     <mj-section background-color="#edfcfc" padding="10px">
       <mj-column width="100%">
-        <mj-text align="center">
+        <mj-text>
           Atenciosamente,<br />
           ClientBottle.
         </mj-text>
