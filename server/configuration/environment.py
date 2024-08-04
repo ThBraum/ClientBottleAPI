@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 from urllib.parse import quote_plus
 
@@ -68,6 +69,9 @@ class Environment(BaseSettings):
             return settings
 
         env_file = ".env"
+
+
+print(f"{os.environ=}")
 
 
 SETTINGS = Environment()

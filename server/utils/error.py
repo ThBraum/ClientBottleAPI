@@ -22,6 +22,7 @@ class CodigoErro(Enum):
     INVALID_INVITE = 1013
     EXPIRED_INVITE = 1014
     USERNAME_IN_USE = 1015
+    INVALID_RECOVER_PASSWORD = 1016
 
 
 MAP_ERRO_PARA_HTTP_STATUS = {
@@ -40,6 +41,7 @@ MAP_ERRO_PARA_HTTP_STATUS = {
     CodigoErro.INVALID_INVITE: status.HTTP_401_UNAUTHORIZED,
     CodigoErro.EXPIRED_INVITE: status.HTTP_401_UNAUTHORIZED,
     CodigoErro.USERNAME_IN_USE: status.HTTP_409_CONFLICT,
+    CodigoErro.INVALID_RECOVER_PASSWORD: status.HTTP_401_UNAUTHORIZED,
 }
 
 MAP_ERRO_PARA_MENSAGEM = {
@@ -58,6 +60,7 @@ MAP_ERRO_PARA_MENSAGEM = {
     CodigoErro.INVALID_INVITE: "Convite inválido. Entre em contato com o suporte.",
     CodigoErro.EXPIRED_INVITE: "Convite expirado. Entre em contato com o suporte.",
     CodigoErro.USERNAME_IN_USE: "Nome de usuário já em uso. Escolha um nome de usuário diferente.",
+    CodigoErro.INVALID_RECOVER_PASSWORD: "Token de recuperação de senha inválido. Entre em contato com o suporte.",
 }
 
 
