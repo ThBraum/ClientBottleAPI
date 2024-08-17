@@ -33,15 +33,21 @@ class BaseMethodEntity:
             setattr(self, key, value)
 
 
+CURRENT_TIMESTAMP_BRAZIL = text("current_timestamp_brazil()")
+
+
 class BaseEntity(BaseMethodEntity):
     __abstract__ = True
 
     fl_active: Mapped[bool] = mapped_column(Boolean, server_default="true")
     created_at: Mapped[datetime.datetime] = mapped_column(
-        DateTime(timezone=True), server_default=text("current_timestamp_brazil()"), nullable=False
+        DateTime(timezone=True), server_default=CURRENT_TIMESTAMP_BRAZIL, nullable=False
     )
     updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(
-        DateTime(timezone=True), onupdate=text("current_timestamp_brazil()"), nullable=True
+        DateTime(timezone=True),
+        server_default=CURRENT_TIMESTAMP_BRAZIL,
+        onupdate=CURRENT_TIMESTAMP_BRAZIL,
+        nullable=True,
     )
     creation_user_id: Mapped[int] = mapped_column(
         ForeignKey("user.id_user"), index=True, server_default="1"
