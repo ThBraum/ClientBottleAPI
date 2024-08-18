@@ -22,7 +22,10 @@ AsyncSessionLocal: sessionmaker[AsyncSession] = sessionmaker(
 
 async def get_db_async() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:
-        yield session
+        try:
+            yield session
+        finally:
+            await session.close()
 
 
 DepDatabaseSession = Annotated[AsyncSession, Depends(get_db_async)]

@@ -68,6 +68,8 @@ async def generate_token(user: User, expires_at: datetime) -> Optional[TokenLogi
         "fl_active": user.fl_active,
         "creation_user_id": user.creation_user_id,
         "created_at": int(user.created_at.timestamp()),
+        "update_user_id": user.update_user_id if user.update_user_id else None,
+        "updated_at": (int(user.updated_at.timestamp()) if user.updated_at else None),
         "jti": str(uuid.uuid4()),
         "exp": int(expires_at.timestamp()),
     }

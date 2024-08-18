@@ -6,7 +6,7 @@ from server.configuration.database import DepDatabaseSession
 from server.model.role import UserRole
 from server.utils.dependencies import DepUserPayload
 
-router = APIRouter(prefix="/server", tags=["Server"])
+router = APIRouter(tags=["Server"])
 
 
 @router.get("/ping/")
@@ -26,7 +26,6 @@ class RoleCreation(BaseModel):
 
 @router.post("/role")
 async def pydantic_role(db: DepDatabaseSession, query_role: UserRole, body_role: RoleCreation):
-    print(f"{query_role=}, {body_role=}")
     return {
         "query_role": query_role,
         "body_role": body_role,

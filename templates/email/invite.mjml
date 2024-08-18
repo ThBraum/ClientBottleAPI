@@ -18,7 +18,7 @@
     <mj-section background-size="cover" padding="0px">
       <mj-column width="100%" background-color="white">
         <mj-text font-size="18px" font-weight="300" color="#030303" align="center">
-        <strong font-style="italic"> ClientBottle </strong>
+          <strong><em>ClientBottle</em></strong>
         </mj-text>
       </mj-column>
     </mj-section>

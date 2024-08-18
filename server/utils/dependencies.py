@@ -29,8 +29,6 @@ def __decode_token(token: Optional[str]):
         raise ClientBottleException([CodigoErro.TOKEN_INVALIDO])
     except jwt.DecodeError:
         raise ClientBottleException([CodigoErro.SESSAO_EXPIRADA_OU_INVALIDA])
-    except Exception as e:
-        raise ClientBottleException from e
 
 
 async def auth_dependency(

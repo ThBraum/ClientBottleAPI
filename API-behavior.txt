@@ -1,0 +1,57 @@
+1. Rotas para user (Usuários)
+    POST /users/invite: Envia um convite por e-mail para um novo usuário.
+    POST /users/register: Registra um novo usuário no sistema após aceitar o convite.
+    POST /users/login: Autentica um usuário e retorna um token de acesso.
+    GET /users/me: Retorna as informações do usuário autenticado.
+    PUT /users/me: Atualiza as informações do usuário autenticado.
+    PUT /users/me/password: Atualiza a senha do usuário autenticado.
+    POST /users/recover-password: Envia um e-mail com instruções para recuperação de senha.
+    POST /users/reset-password: Reseta a senha usando o token recebido por e-mail.
+    GET /users: Lista todos os usuários (restrito ao administrador).
+    GET /users/:id: Retorna as informações de um usuário específico (restrito ao administrador).
+    DELETE /users/:id: Deleta um usuário específico (restrito ao administrador).
+
+2. Rotas para role (Papéis)
+    GET /roles: Lista todos os papéis disponíveis (e.g., ADMINISTRATOR, USER).
+    POST /roles: Cria um novo papel.
+    GET /roles/:id: Retorna as informações de um papel específico.
+    PUT /roles/:id: Atualiza um papel específico.
+    DELETE /roles/:id: Deleta um papel específico.
+
+3. Rotas para bottle_brand (Marca de Garrafas)
+    GET /bottle-brands: Lista todas as marcas de garrafas.
+    POST /bottle-brands: Cria uma nova marca de garrafa.
+    GET /bottle-brands/:id: Retorna as informações de uma marca específica.
+    PUT /bottle-brands/:id: Atualiza as informações de uma marca específica.
+    DELETE /bottle-brands/:id: Deleta uma marca de garrafa específica.
+
+4. Rotas para bottle (Garrafas)
+    GET /bottles: Lista todas as garrafas.
+    POST /bottles: Cria uma nova garrafa.
+    GET /bottles/:id: Retorna as informações de uma garrafa específica.
+    PUT /bottles/:id: Atualiza as informações de uma garrafa específica.
+    DELETE /bottles/:id: Deleta uma garrafa específica.
+
+5. Rotas para client (Clientes)
+    GET /clients: Lista todos os clientes.
+    POST /clients: Cria um novo cliente.
+    GET /clients/:id: Retorna as informações de um cliente específico.
+    PUT /clients/:id: Atualiza as informações de um cliente específico.
+    DELETE /clients/:id: Deleta um cliente específico.
+
+6. Rotas para client_bottle_transaction (Transações de Garrafas por Clientes)
+    GET /transactions: Lista todas as transações.
+    POST /transactions: Cria uma nova transação (associa um cliente a uma garrafa).
+    GET /transactions/:id: Retorna as informações de uma transação específica.
+    PUT /transactions/:id: Atualiza uma transação específica.
+    DELETE /transactions/:id: Deleta uma transação específica.
+
+7. Rotas para invite (Convites)
+    GET /invites: Lista todos os convites enviados.
+    POST /invites: Envia um novo convite para um usuário.
+    GET /invites/:id: Retorna as informações de um convite específico.
+    DELETE /invites/:id: Cancela um convite específico.
+
+8. Rotas para recover_password (Recuperação de Senha)
+    POST /recover-password: Inicia o processo de recuperação de senha (envia e-mail).
+    POST /reset-password: Conclui o processo de recuperação de senha usando um token.

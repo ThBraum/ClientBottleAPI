@@ -2,7 +2,7 @@ from enum import Enum, unique
 from typing import List
 
 from fastapi import status
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.responses import PlainTextResponse
 
 
 @unique
@@ -58,7 +58,7 @@ MAP_ERRO_PARA_MENSAGEM = {
     CodigoErro.SESSAO_EXPIRADA: "Sua sessão expirou. Faça login novamente.",
     CodigoErro.ADMIN_ONLY: "Acesso restrito a administradores. Entre em contato com o suporte.",
     CodigoErro.INVALID_INVITE: "Convite inválido. Entre em contato com o suporte.",
-    CodigoErro.EXPIRED_INVITE: "Convite expirado. Entre em contato com o suporte.",
+    CodigoErro.EXPIRED_INVITE: "Convite expirado. Entre em contato com o adminstrador que te convidou.",
     CodigoErro.USERNAME_IN_USE: "Nome de usuário já em uso. Escolha um nome de usuário diferente.",
     CodigoErro.INVALID_RECOVER_PASSWORD: "Token de recuperação de senha inválido. Entre em contato com o suporte.",
 }

@@ -71,7 +71,4 @@ class Environment(BaseSettings):
         env_file = ".env"
 
 
-print(f"{os.environ=}")
-
-
 SETTINGS = Environment()

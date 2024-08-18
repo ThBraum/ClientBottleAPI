@@ -5,13 +5,15 @@ from fastapi.security import HTTPBearer, OAuth2PasswordBearer
 
 from server.configuration.environment import SETTINGS
 from server.controller.auth_controller import router as auth_router
+from server.controller.bottle_brand_controller import router as bottle_brand_router
 from server.controller.invite_controller import router as invite_router
+from server.controller.recover_password_controller import router as recover_password_router
 from server.controller.server_controller import router as server_router
 from server.utils.exceptions import add_exception_handlers, add_http_exception_handlers
 from server.utils.handler import setup_marketplace_exception_handling
 from server.utils.logger import logger
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/server/auth/login/")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login/")
 security = HTTPBearer()
 
 
@@ -35,6 +37,8 @@ def _config_app_routes(app: FastAPI) -> FastAPI:
         # Importar os routers aqui
         auth_router,
         invite_router,
+        recover_password_router,
+        bottle_brand_router,
         server_router,
     ]
     for route in routers:
@@ -73,7 +77,7 @@ def _custom_openapi(app: FastAPI):
             "type": "oauth2",
             "flows": {
                 "password": {
-                    "tokenUrl": "/server/auth/login/",
+                    "tokenUrl": "/auth/login/",
                 }
             },
         },
@@ -94,7 +98,7 @@ def _config_validation_exceptions(app: FastAPI) -> FastAPI:
 
 
 def _config_http_exceptions(app: FastAPI) -> FastAPI:
-    add_http_exception_handlers(app)
+    # add_http_exception_handlers(app)
     return app
 
 

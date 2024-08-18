@@ -26,11 +26,11 @@ class _InviteRepository:
                 return invite
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Usuário já registrado com o email {invite.email}",
+                detail=f"Usuário já registrado com o email {invite.email}.",
             )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Convite já enviado para {invite.email}",
+            detail=f"Convite já enviado para {invite.email}.",
         )
 
     async def create_recover_password(
@@ -86,7 +86,6 @@ class _InviteRepository:
         return user
 
     async def get_recover_password_by_token(self, token: str):
-        self.logger.info(f"Getting recover password by token = {token}")
         query = text(
             """
             SELECT token
@@ -98,7 +97,6 @@ class _InviteRepository:
         return result.fetchone()
 
     async def get_user_by_recover_password_token(self, token: str) -> Optional[User]:
-        self.logger.info(f"Getting user by recover password token = {token}")
         query = text(
             """
             SELECT "user".*
@@ -133,7 +131,6 @@ class _InviteRepository:
         await self.db.commit()
 
     async def delete_recover_password_by_token(self, token: str):
-        self.logger.info(f"Deleting recover password by token = {token}")
         await self.db.execute(
             text(
                 """
@@ -144,7 +141,6 @@ class _InviteRepository:
             {"token": token},
         )
         await self.db.commit()
-        self.logger.info(f"Recover password deleted by token = {token}")
 
     async def already_registered(self, email: str) -> bool:
         result = await self.db.execute(select(User).where(User.email == email))
@@ -156,11 +152,9 @@ class _InviteRepository:
         invite = result.scalars().one_or_none()
         return invite is not None
 
-    async def get_invite_by_token(self, token: str):
-        self.logger.info(f"Getting invite by token = {token}")
+    async def get_invite_by_token(self, token: str) -> Optional[Invite]:
         result = await self.db.execute(select(Invite).where(Invite.token == token))
         invite = result.scalars().one_or_none()
-        self.logger.info(f"Invite found for token {token}")
         return invite
 
     async def get_invite_by_id(self, id_invite: int):
@@ -182,6 +176,19 @@ class _InviteRepository:
         await self.db.delete(invite)
         await self.db.commit()
         self.logger.info(f"Invite deleted for {invite.email}")
+
+    async def delete_expired_invite(self, id_invite: int):
+        self.logger.info(f"Deleting expired invite for id = {id_invite}")
+        await self.db.execute(
+            text(
+                """
+                DELETE FROM invite
+                WHERE id_invite = :id_invite
+                """
+            ),
+            {"id_invite": id_invite},
+        )
+        await self.db.commit()
 
     async def create_user(self, user: User) -> Optional[User]:
         self.logger.info(f"Creating user {user.email}")

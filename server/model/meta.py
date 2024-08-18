@@ -24,10 +24,10 @@ class BaseMethodEntity:
     __abstract__ = True
 
     @classmethod
-    def create(cls, creation_user_id: Optional[int], **kwargs):
+    async def create(cls, creation_user_id: Optional[int], **kwargs):
         return cls(creation_user_id=creation_user_id, **kwargs)
 
-    def update(self, update_user_id: Optional[int], **kwargs):
+    async def update(self, update_user_id: Optional[int], **kwargs):
         self.update_user_id = update_user_id
         for key, value in kwargs.items():
             setattr(self, key, value)

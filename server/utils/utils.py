@@ -8,8 +8,9 @@ def normalize_string(input_str):
     return only_ascii.lower()
 
 
-def get_first_record_as_dict(result) -> Dict:
-    return dict(first_record._mapping) if (first_record := result.first()) else {}
+async def get_first_record_as_dict(result) -> Dict:
+    first_record = result.first()
+    return dict(first_record._mapping) if first_record else {}
 
 
 async def get_all_records_as_list(execution) -> list[Dict[str, Any]]:

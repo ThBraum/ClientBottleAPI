@@ -18,7 +18,7 @@ from server.utils.error import ClientBottleException, CodigoErro
 from server.utils.types import SessionPayload
 
 
-class _AuthService:
+class _InviteService:
     def __init__(self, db: DepDatabaseSession):
         self.db = db
         self.repository: _InviteRepository = InviteRepository(db)
@@ -71,6 +71,7 @@ class _AuthService:
         current_time = datetime.now(sao_paulo_tz).astimezone(sao_paulo_tz)
         invite_expiry = invite.expires_at.astimezone(sao_paulo_tz)
         if invite_expiry < current_time:
+            await self.repository.delete_expired_invite(invite.id_invite)
             raise ClientBottleException(CodigoErro.EXPIRED_INVITE)
 
         new_user = await self.create_user(user_create, invite)
@@ -130,4 +131,4 @@ class _AuthService:
         return {"message": "Invite deleted", "invite": invite}
 
 
-InviteService = Annotated[_AuthService, Depends(_AuthService)]
+InviteService = Annotated[_InviteService, Depends(_InviteService)]
