@@ -42,6 +42,12 @@ class _BottleBrandService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Marca não encontrada."
             )
+
+        if data.new_name and await self.repository.get_bottle_brand(name=data.new_name):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Já existe uma marca com esse nome.",
+            )
         updated_brand = await self.repository.update_bottle_brand(
             bottle_brand, update_user_id=user.id_user, new_name=data.new_name
         )

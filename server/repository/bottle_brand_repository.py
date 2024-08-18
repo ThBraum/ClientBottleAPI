@@ -2,7 +2,7 @@ import logging
 from typing import Annotated, List, Optional
 
 from fastapi import Depends
-from sqlalchemy import delete, or_, select, text
+from sqlalchemy import delete, select, text
 
 from server.configuration.database import DepDatabaseSession
 from server.model.bottle_brand import BottleBrand
@@ -48,11 +48,27 @@ class _BottleBrandRepository:
     async def update_bottle_brand(
         self, bottle_brand: BottleBrand, update_user_id: int, new_name: str
     ) -> BottleBrand:
-        await bottle_brand.update(update_user_id=update_user_id, name=new_name)
-        self.db.add(bottle_brand)
+        query = text(
+            """
+            UPDATE bottle_brand
+            SET update_user_id = :update_user_id,
+                name           = :name
+            WHERE id_bottle_brand = :id_bottle_brand
+            """
+        )
+        await self.db.execute(
+            query,
+            {
+                "update_user_id": update_user_id,
+                "name": new_name,
+                "id_bottle_brand": bottle_brand.id_bottle_brand,
+            },
+        )
         await self.db.commit()
-        await self.db.refresh(bottle_brand)
-        return bottle_brand
+        result = await self.db.execute(
+            select(BottleBrand).where(BottleBrand.id_bottle_brand == bottle_brand.id_bottle_brand)
+        )
+        return result.scalars().one_or_none()
 
     async def delete_bottle_brand(self, id_bottle_brand: int):
         await self.db.execute(
