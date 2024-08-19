@@ -26,6 +26,7 @@ bcrypt = "^4.2.0"
 passlib = "^1.7.4"
 mjml = "^0.7.0"
 email-validator = "^2.2.0"
+fastapi-pagination = {extras = ["sqlalchemy"], version = "^0.12.26"}
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.1"

@@ -30,7 +30,6 @@ async def create_bottle_brand(
     "/bottle-brands/",
     summary="Get All Bottle Brands",
     response_model=List[BottleBrandOutput],
-    status_code=status.HTTP_200_OK,
 )
 async def get_all_bottle_brands(user: DepUserPayload, service: BottleBrandService):
     return await service.get_all_bottle_brands(user)
@@ -40,7 +39,6 @@ async def get_all_bottle_brands(user: DepUserPayload, service: BottleBrandServic
     "/bottle-brand/",
     summary="Get Bottle Brand by Name or ID",
     response_model=BottleBrandOutput,
-    status_code=status.HTTP_200_OK,
 )
 async def get_bottle_brand(
     user: DepUserPayload,
@@ -56,7 +54,6 @@ async def get_bottle_brand(
     "/bottle-brand/",
     summary="Update Bottle Brand",
     response_model=BottleBrandOutput,
-    status_code=status.HTTP_200_OK,
 )
 async def update_bottle_brand(
     user: DepUserPayload, data: BottleBrandUpdate, service: BottleBrandService

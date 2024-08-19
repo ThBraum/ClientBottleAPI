@@ -30,18 +30,21 @@ class _BottleBrandRepository:
     async def get_bottle_brand(
         self, name: Optional[str] = None, id_bottle_brand: Optional[int] = None
     ) -> Optional[BottleBrand]:
+        name_pattern = f"%{name}%" if name else None
         query = text(
             """
             SELECT *
             FROM bottle_brand
             WHERE public.unaccent(LOWER(name)) ILIKE public.unaccent(LOWER(:name))
-            OR id_bottle_brand = :id_bottle_brand;
+            OR id_bottle_brand = :id_bottle_brand
             """
         )
-        result = await self.db.execute(query, {"name": name, "id_bottle_brand": id_bottle_brand})
+        result = await self.db.execute(
+            query, {"name": name_pattern, "id_bottle_brand": id_bottle_brand}
+        )
         brand_dict = await get_first_record_as_dict(result)
 
-        if brand_dict:
+        if brand_dict and brand_dict != {}:
             return BottleBrand(**brand_dict)
         return None
 

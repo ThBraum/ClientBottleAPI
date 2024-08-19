@@ -11,7 +11,7 @@ class Bottle(Base, BaseEntity):
 
     id_bottle: Mapped[int] = mapped_column(Integer, primary_key=True)
     id_bottle_brand: Mapped[int] = mapped_column(
-        Integer, ForeignKey("bottle_brand.id_bottle_brand")
+        ForeignKey("bottle_brand.id_bottle_brand"), index=True
     )
 
     rl_bottle_brand: Mapped[BottleBrand] = relationship(foreign_keys=[id_bottle_brand])

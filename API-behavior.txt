@@ -1,3 +1,17 @@
+1. CRUD para ClientBottleTransaction com Criação Automática de Clientes:
+    Implementar o fluxo de criação automática de clientes: Ao criar uma transação para um cliente que ainda não existe, o sistema deve automaticamente criar o cliente no banco de dados antes de registrar a transação.
+    Validação de Dados: Certificar que dados do cliente, como o nome e telefone, sejam validados de forma adequada antes de criar o registro no banco.
+    Manutenção de Transações Ativas: Garantia de que apenas transações ativas (fl_active = True) sejam levadas em conta para qualquer consulta ou operação subsequente.
+
+2. Rotas para client_bottle_transaction:
+    Criação de Transações (POST /transactions/): Esta rota deve ser capaz de criar uma nova transação de garrafas para um cliente. Se o cliente não existir, ele deve ser criado no processo.
+    Listagem de Transações (GET /transactions/): Liste todas as transações ativas de forma paginada, com a opção de filtrar por cliente ou marca de garrafa.
+    Atualização de Transações (PATCH /transactions/{id}): Permitir que a quantidade de garrafas em uma transação seja atualizada.
+    Exclusão de Transações (DELETE /transactions/{id}): Remova uma transação.
+    Desativação/ativação de Transações (PATCH /transactions/deactivate/ - /transactions/activate/): Desative/ative (fl_active) uma transação.
+
+------------------------
+
 1. Rotas para user (Usuários)
     POST /users/invite: Envia um convite por e-mail para um novo usuário.
     POST /users/register: Registra um novo usuário no sistema após aceitar o convite.
