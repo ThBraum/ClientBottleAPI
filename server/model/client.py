@@ -14,4 +14,5 @@ class Client(Base, BaseEntity):
 
     id_client: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String)
+    last_name: Mapped[str] = mapped_column(String)
     phone: Mapped[Optional[str]] = mapped_column(String)

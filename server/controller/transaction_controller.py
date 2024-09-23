@@ -31,6 +31,7 @@ router_test = APIRouter(tags=["Test - Pagination and AsyncSession"])
 )
 async def get_transactions(
     service: TransactionService,
+    user: DepUserPayload,
     page: int = Query(1),
     size: int = Query(50),
     term: Optional[str] = Query(None, description="Search term"),

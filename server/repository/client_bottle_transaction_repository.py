@@ -171,6 +171,7 @@ class _TransactionRepository:
             """
             SELECT cbt.id_client_bottle_transaction,
                 c.name                    AS client_name,
+                c.last_name               AS client_last_name,
                 c.phone                   AS client_phone,
                 cbt.transaction_data_json AS transaction_data,
                 cbt.transaction_date,

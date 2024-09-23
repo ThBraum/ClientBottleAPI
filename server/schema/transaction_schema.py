@@ -16,6 +16,7 @@ class BottleBrandData(BaseModel):
 class TransactionOutput(BaseModel):
     id_client_bottle_transaction: Optional[int] = None
     client_name: Optional[str] = None
+    client_last_name: Optional[str] = None
     client_phone: Optional[str] = None
     transaction_data: Optional[List[BottleBrandData]] = None
     transaction_date: Optional[date] = None
@@ -59,5 +60,6 @@ class BottleBrandInput(BaseModel):
 
 class TransactionCreateInput(BaseModel):
     client_name: str
+    last_name: str
     client_phone: Optional[str] = None
     transaction_data: List[BottleBrandInput]
