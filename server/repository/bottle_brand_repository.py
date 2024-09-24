@@ -16,8 +16,8 @@ class _BottleBrandRepository:
         self.db = db
         self.logger = logging.getLogger(__name__)
 
-    async def create_bottle_brand(self, creation_user_id: int, name: str) -> Optional[BottleBrand]:
-        new_brand = await BottleBrand.create(creation_user_id=creation_user_id, name=name)
+    async def create_bottle_brand(self, creation_user_id: int, name: str) -> BottleBrand:
+        new_brand = BottleBrand(creation_user_id=creation_user_id, name=name)
         self.db.add(new_brand)
         await self.db.commit()
         await self.db.refresh(new_brand)

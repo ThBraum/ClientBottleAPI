@@ -5,7 +5,7 @@ from fastapi_pagination import Page, add_pagination
 from fastapi_pagination.ext.sqlalchemy import paginate
 
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from sqlalchemy import String, func, or_, select, text
 from server.configuration.database import DepDatabaseSession
 from server.model.bottle_brand import BottleBrand
@@ -31,6 +31,7 @@ class _TransactionRepository:
             select(
                 ClientBottleTransaction.id_client_bottle_transaction,
                 Client.name.label("client_name"),
+                Client.last_name.label("client_last_name"),
                 Client.phone.label("client_phone"),
                 ClientBottleTransaction.transaction_data_json.label("transaction_data"),
                 ClientBottleTransaction.transaction_date,
@@ -53,6 +54,7 @@ class _TransactionRepository:
             select(
                 ClientBottleTransaction.id_client_bottle_transaction,
                 Client.name.label("client_name"),
+                Client.last_name.label("client_last_name"),
                 Client.phone.label("client_phone"),
                 ClientBottleTransaction.transaction_data_json.label("transaction_data"),
                 ClientBottleTransaction.transaction_date,
@@ -84,6 +86,7 @@ class _TransactionRepository:
             select(
                 ClientBottleTransaction.id_client_bottle_transaction,
                 Client.name.label("client_name"),
+                Client.last_name.label("client_last_name"),
                 Client.phone.label("client_phone"),
                 ClientBottleTransaction.transaction_data_json.label("transaction_data"),
                 func.date(ClientBottleTransaction.transaction_date).label("transaction_date"),
@@ -101,17 +104,19 @@ class _TransactionRepository:
         transactions = await paginate(self.db, query, unique=False)
         return await process_transaction_data(transactions, self.db)
 
-    async def get_client(self, name: str, phone: Optional[str] = None) -> Optional[Client]:
+    async def get_client(self, name: str, last_name: str) -> Optional[Client]:
         name_pattern = f"%{name}%" if name else None
+        last_name_pattern = f"%{last_name}%" if last_name else None
         query = text(
             """
             SELECT *
             FROM client
-            WHERE public.unaccent(LOWER(name)) LIKE public.unaccent(LOWER(:name))
-            OR phone LIKE :phone
+            WHERE public.unaccent(LOWER(name)) LIKE public.unaccent(LOWER(:name)) AND public.unaccent(LOWER(last_name)) LIKE public.unaccent(LOWER(:last_name))
             """
         )
-        result = await self.db.execute(query, {"name": name_pattern, "phone": phone})
+        result = await self.db.execute(
+            query, {"name": name_pattern, "last_name": last_name_pattern}
+        )
         client_dict = await get_first_record_as_dict(result)
         if client_dict and client_dict != {}:
             return Client(**client_dict)
@@ -119,7 +124,10 @@ class _TransactionRepository:
 
     async def post_client(self, data: TransactionCreateInput, user: SessionPayload) -> Client:
         new_client = Client(
-            name=data.client_name, phone=data.client_phone, creation_user_id=user.id_user
+            name=data.client_name,
+            last_name=data.last_name,
+            phone=data.client_phone,
+            creation_user_id=user.id_user,
         )
         self.db.add(new_client)
         await self.db.commit()
@@ -129,7 +137,7 @@ class _TransactionRepository:
     async def get_or_post_client(
         self, data: TransactionCreateInput, user: SessionPayload
     ) -> Client:
-        client = await self.get_client(data.client_name, data.client_phone)
+        client = await self.get_client(data.client_name, data.last_name)
         if not client:
             client = await self.post_client(data, user)
         return client
@@ -189,8 +197,7 @@ class _TransactionRepository:
             transaction_data = transaction_dict["transaction_data"]
             for item in transaction_data:
                 brand_name = await self.get_brand_name_by_id(item["brand_id"])
-                item["brand"] = brand_name
-                del item["brand_id"]
+                item["brand_name"] = brand_name
             transaction_dict["transaction_data"] = transaction_data
             return TransactionOutput(**transaction_dict)
         return None
@@ -206,6 +213,77 @@ class _TransactionRepository:
         result = await self.db.execute(query, {"brand_id": brand_id})
         brand_dict = await get_first_record_as_dict(result)
         return brand_dict.get("name") if brand_dict else None
+
+    async def get_transaction_by_id(
+        self, transaction_id: int
+    ) -> Optional[ClientBottleTransaction]:
+        result = await self.db.execute(
+            select(ClientBottleTransaction).where(
+                ClientBottleTransaction.id_client_bottle_transaction == transaction_id
+            )
+        )
+        return result.scalars().one_or_none()
+
+    async def get_client_by_id(self, client_id: int) -> Optional[Client]:
+        result = await self.db.execute(select(Client).where(Client.id_client == client_id))
+        return result.scalars().one_or_none()
+
+    async def update_client(
+        self,
+        client_id: int,
+        client_name: Optional[str],
+        last_name: Optional[str],
+        client_phone: Optional[str],
+        user: SessionPayload,
+    ) -> None:
+        if client_id is not None:
+            client = await self.get_client_by_id(client_id)
+        else:
+            client = await self.get_client(client_name, last_name)
+        if not client:
+            raise HTTPException(status_code=404, detail="Client not found")
+
+        if client_name is not None:
+            client.name = client_name
+        if last_name is not None:
+            client.last_name = last_name
+        if client_phone is not None:
+            client.phone = client_phone
+        client.update_user_id = user.id_user
+
+        self.db.add(client)
+        await self.db.commit()
+        await self.db.refresh(client)
+
+    async def update_transaction(
+        self,
+        transaction_id: int,
+        transaction_data_json: list,
+        recorded_by: Optional[str],
+        id_user: int,
+    ) -> None:
+        transaction = await self.get_transaction_by_id(transaction_id)
+        if not transaction:
+            raise HTTPException(status_code=404, detail="Transaction not found")
+
+        transaction.transaction_data_json = transaction_data_json
+        transaction.recorded_by = recorded_by
+        transaction.update_user_id = id_user
+
+        self.db.add(transaction)
+        await self.db.commit()
+        await self.db.refresh(transaction)
+        
+        
+    async def deactivate_transaction(self, transaction_id: int, user: SessionPayload):
+        transaction = await self.get_transaction_by_id(transaction_id)
+        if not transaction:
+            raise HTTPException(status_code=404, detail="Transaction not found")
+        transaction.fl_active = False
+        transaction.update_user_id = user.id_user
+        self.db.add(transaction)
+        await self.db.commit()
+        await self.db.refresh(transaction)
 
 
 TransactionRepository = Annotated[_TransactionRepository, Depends(_TransactionRepository)]

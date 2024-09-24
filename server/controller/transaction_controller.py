@@ -10,7 +10,12 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 from server.configuration.database import DepDatabaseSession
 from server.model.role import UserRole
 from server.model.user import User
-from server.schema.transaction_schema import TransactionCreateInput, TransactionOutput, UserOut
+from server.schema.transaction_schema import (
+    TransactionCreateInput,
+    TransactionOutput,
+    TransactionUpdateInput,
+    UserOut,
+)
 
 from fastapi import Query, status
 
@@ -65,6 +70,43 @@ async def post_transaction(
     Create a new transaction for a client. If the client doesn't exist, they will be created automatically.
     """
     return await service.post_transaction(transaction_input, user)
+
+
+@router.put(
+    "/transaction/{transaction_id}",
+    summary="Update an existing client bottle transaction",
+    response_model=TransactionOutput,
+    status_code=status.HTTP_200_OK,
+)
+async def update_transaction(
+    transaction_id: int,
+    transaction_input: TransactionUpdateInput,
+    service: TransactionService,
+    user: DepUserPayload,
+):
+    """
+    Update an existing transaction for a client.
+    """
+    return await service.update_transaction(transaction_id, transaction_input, user)
+
+
+@router.delete(
+    "/transaction/{transaction_id}/",
+    summary="Deactivate a transaction",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def deactivate_transaction(
+    transaction_id: int,
+    service: TransactionService,
+    user: DepUserPayload,
+):
+    """
+    Deactivate a transaction without deletion, ensuring data persistence for future reports.
+    This endpoint sets the transaction as inactive (`fl_active = False`) to maintain the data,
+    allowing the generation of a PDF report at the end of the month that shows the relationship
+    between borrowed and returned bottles. The generated report is saved in `AWS S3` for future access.
+    """
+    await service.deactivate_transaction(transaction_id, user)
 
 
 @router_test.get("/users/me/default", response_model=Page[UserOut])

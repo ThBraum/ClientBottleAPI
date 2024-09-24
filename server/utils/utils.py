@@ -35,7 +35,7 @@ async def process_transaction_data(
                 if brand_id:
                     brand_name = await get_bottle_brand_name(db, brand_id)
                     if brand_name:
-                        item.brand = brand_name
+                        item.brand_name = brand_name
     return transactions
 
 
