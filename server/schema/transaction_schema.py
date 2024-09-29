@@ -1,8 +1,8 @@
+from datetime import date
 from typing import List, Optional
+
 from fastapi import HTTPException
 from pydantic import BaseModel, EmailStr, field_validator, model_validator
-
-from datetime import date
 
 from server.model.role import UserRole
 
@@ -63,22 +63,25 @@ class TransactionCreateInput(BaseModel):
     last_name: str
     client_phone: Optional[str] = None
     transaction_data: List[BottleBrandInput]
-    
-    
+
+
 class TransactionUpdateInput(BaseModel):
     client_name: Optional[str] = None
     last_name: Optional[str] = None
     client_phone: Optional[str] = None
     transaction_data: Optional[List[BottleBrandInput]] = None
 
-    @model_validator(mode='before')
+    @model_validator(mode="before")
     @classmethod
     def check_at_least_one_field(cls, values):
-        if not any(values.get(field) for field in ['client_name', 'last_name', 'client_phone', 'transaction_data']):
+        if not any(
+            values.get(field)
+            for field in ["client_name", "last_name", "client_phone", "transaction_data"]
+        ):
             raise ValueError("Pelo menos um campo deve ser fornecido para atualização.")
         return values
 
-    @field_validator('transaction_data')
+    @field_validator("transaction_data")
     @classmethod
     def validate_transaction_data(cls, value):
         if value is not None and len(value) == 0:

@@ -1,22 +1,22 @@
 import logging
+from datetime import date
 from typing import Annotated, List, Optional
 
+from fastapi import Depends, HTTPException
 from fastapi_pagination import Page, add_pagination
 from fastapi_pagination.ext.sqlalchemy import paginate
-
-
-from fastapi import Depends, HTTPException
 from sqlalchemy import String, func, or_, select, text
+
 from server.configuration.database import DepDatabaseSession
 from server.model.bottle_brand import BottleBrand
 from server.model.client import Client
 from server.model.client_bottle_transaction import ClientBottleTransaction
-from server.repository.bottle_brand_repository import _BottleBrandRepository, BottleBrandRepository
-
-from server.schema.transaction_schema import BottleBrandInput
-from server.schema.transaction_schema import TransactionCreateInput, TransactionOutput
-from datetime import date
-
+from server.repository.bottle_brand_repository import BottleBrandRepository, _BottleBrandRepository
+from server.schema.transaction_schema import (
+    BottleBrandInput,
+    TransactionCreateInput,
+    TransactionOutput,
+)
 from server.utils.types import SessionPayload
 from server.utils.utils import get_first_record_as_dict, process_transaction_data
 
@@ -205,8 +205,8 @@ class _TransactionRepository:
     async def get_brand_name_by_id(self, brand_id: int) -> Optional[str]:
         query = text(
             """
-            SELECT name 
-            FROM bottle_brand 
+            SELECT name
+            FROM bottle_brand
             WHERE id_bottle_brand = :brand_id
             """
         )
@@ -273,8 +273,7 @@ class _TransactionRepository:
         self.db.add(transaction)
         await self.db.commit()
         await self.db.refresh(transaction)
-        
-        
+
     async def deactivate_transaction(self, transaction_id: int, user: SessionPayload):
         transaction = await self.get_transaction_by_id(transaction_id)
         if not transaction:

@@ -1,11 +1,11 @@
+from datetime import date, datetime
 from typing import Optional
-from fastapi import APIRouter
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
+from fastapi import APIRouter, Query, status
 from fastapi_pagination import LimitOffsetPage, Page, add_pagination
 from fastapi_pagination.ext.sqlalchemy import paginate
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from server.configuration.database import DepDatabaseSession
 from server.model.role import UserRole
@@ -16,16 +16,12 @@ from server.schema.transaction_schema import (
     TransactionUpdateInput,
     UserOut,
 )
-
-from fastapi import Query, status
-
 from server.service.client_bottle_transaction_service import TransactionService
 from server.utils.dependencies import DepUserPayload
-
-from datetime import date
-
+from server.utils.reports import generate_pdf, upload_pdf_to_s3
 
 router = APIRouter(tags=["Client Bottle Transaction"])
+report_router = APIRouter(tags=["Client Bottle Transaction Report"])
 router_test = APIRouter(tags=["Test - Pagination and AsyncSession"])
 
 
@@ -107,6 +103,30 @@ async def deactivate_transaction(
     between borrowed and returned bottles. The generated report is saved in `AWS S3` for future access.
     """
     await service.deactivate_transaction(transaction_id, user)
+
+
+@report_router.post("/generate-report/", summary="Generate and upload a PDF report")
+async def generate_report(session: DepDatabaseSession, user: DepUserPayload):
+    """
+    Generate and upload a PDF report.
+
+    This endpoint generates a PDF report of the transactions and uploads it to AWS S3.
+
+    Parameters:
+    - `session`: The database session.
+
+    Returns:
+    - A dictionary with the message "Report generated and uploaded to S3 successfully and the URL to the file.
+    """
+
+    current_month = datetime.now().strftime("%Y-%m")
+    file_name = f"transactions_report_{current_month}.pdf"
+
+    pdf_buffer = await generate_pdf(session=session)
+
+    file_url = await upload_pdf_to_s3(pdf_buffer, "client-bottle", file_name)
+
+    return {"message": "Report generated and uploaded to S3 successfully.", "url": file_url}
 
 
 @router_test.get("/users/me/default", response_model=Page[UserOut])

@@ -9,6 +9,7 @@ from server.controller.bottle_brand_controller import router as bottle_brand_rou
 from server.controller.invite_controller import router as invite_router
 from server.controller.recover_password_controller import router as recover_password_router
 from server.controller.server_controller import router as server_router
+from server.controller.transaction_controller import report_router
 from server.controller.transaction_controller import router as transaction_router
 from server.controller.transaction_controller import router_test as transaction_router_test
 from server.utils.exceptions import add_exception_handlers, add_http_exception_handlers
@@ -41,6 +42,7 @@ def _config_app_routes(app: FastAPI) -> FastAPI:
         invite_router,
         recover_password_router,
         transaction_router,
+        report_router,
         bottle_brand_router,
         server_router,
         transaction_router_test,

@@ -20,6 +20,9 @@ x-environment: &CLIENTBOTTLE_ENV
 
   FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
 
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+
 x-clientbottle-service: &CLIENTBOTTLE_SERVICE
   build:
     context: .

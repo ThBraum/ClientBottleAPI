@@ -27,6 +27,8 @@ passlib = "^1.7.4"
 mjml = "^0.7.0"
 email-validator = "^2.2.0"
 fastapi-pagination = {extras = ["sqlalchemy"], version = "^0.12.26"}
+boto3 = "^1.35.29"
+reportlab = "^4.2.4"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.1"
