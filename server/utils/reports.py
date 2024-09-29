@@ -1,20 +1,20 @@
+import calendar
+import logging
+import os
 from datetime import datetime
 from io import BytesIO
-import calendar
-import os
+
 import boto3
-from sqlalchemy import select, extract
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Spacer
-from reportlab.graphics.shapes import Drawing, Rect, String
-from reportlab.graphics.charts.lineplots import LinePlot
-from reportlab.graphics.charts.legends import Legend
-from reportlab.lib import colors
-from reportlab.platypus import Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.graphics.widgets.markers import makeMarker
-import logging
 from fastapi import HTTPException, status
+from reportlab.graphics.charts.legends import Legend
+from reportlab.graphics.charts.lineplots import LinePlot
+from reportlab.graphics.shapes import Drawing, Rect, String
+from reportlab.graphics.widgets.markers import makeMarker
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
+from sqlalchemy import extract, select
 
 from server.configuration.database import DepDatabaseSession
 from server.model.client_bottle_transaction import ClientBottleTransaction
@@ -50,6 +50,7 @@ bucket_name = "client-bottle"
 async def generate_pdf(session: DepDatabaseSession):
     current_year = datetime.now().year
     current_month = datetime.now().month
+    current_day = datetime.now().day
 
     months_pt_br = [
         "Janeiro",
@@ -65,7 +66,7 @@ async def generate_pdf(session: DepDatabaseSession):
         "Novembro",
         "Dezembro",
     ]
-    month_name = months_pt_br[datetime.now().month - 1]
+    month_name = months_pt_br[current_month - 1]
 
     last_day = calendar.monthrange(current_year, current_month)[1]
 
@@ -88,37 +89,44 @@ async def generate_pdf(session: DepDatabaseSession):
     pdf = SimpleDocTemplate(buffer, pagesize=letter)
     elements = []
 
-    days_in_month = range(1, last_day + 1)
+    days_in_month = range(1, current_day + 1)
 
-    active_counts = [
-        sum(
+    active_counts = []
+    inactive_counts = []
+
+    cumulative_active = 0
+    cumulative_inactive = 0
+
+    for day in days_in_month:
+        active_sum = sum(
             item["quantity"]
             for t in transactions_active
             if t.transaction_date.day == day
             for item in t.transaction_data_json
         )
-        for day in days_in_month
-    ]
-    inactive_counts = [
-        sum(
+        inactive_sum = sum(
             item["quantity"]
             for t in transactions_inactive
             if t.transaction_date.day == day
             for item in t.transaction_data_json
         )
-        for day in days_in_month
-    ]
+
+        cumulative_active += active_sum
+        cumulative_inactive += inactive_sum
+
+        active_counts.append(cumulative_active)
+        inactive_counts.append(cumulative_inactive)
 
     drawing_width = 570
     drawing = Drawing(drawing_width, 300)
 
-    rectangle_width = drawing_width - 110
+    rectangle_width = drawing_width - 85
     drawing.add(Rect(-50, 0, rectangle_width, 300, fillColor=colors.lightblue))
 
     line_chart = LinePlot()
     line_chart.x = -25
     line_chart.y = 50
-    line_chart.width = rectangle_width - 70
+    line_chart.width = rectangle_width - 45
     line_chart.height = 200
 
     line_chart.data = [
@@ -136,17 +144,19 @@ async def generate_pdf(session: DepDatabaseSession):
 
     line_chart.xValueAxis.valueMin = 1
     line_chart.xValueAxis.valueMax = last_day
-    line_chart.xValueAxis.valueStep = 2
+    line_chart.xValueAxis.valueStep = 1
     line_chart.xValueAxis.labelTextFormat = "%d"
     line_chart.yValueAxis.valueMin = 0
     line_chart.yValueAxis.valueMax = 350
     line_chart.yValueAxis.valueStep = 50
 
     for day, active, inactive in zip(days_in_month, active_counts, inactive_counts):
-        x_position = line_chart.x + ((day - 1) * (line_chart.width / (last_day - 1)))
+        x_position = line_chart.x + ((day - 1) * (line_chart.width / (current_day - 1)))
 
         if active > 0:
-            y_position_active = line_chart.y + (active * (line_chart.height / 350))
+            y_position_active = line_chart.y + (
+                active * (line_chart.height / line_chart.yValueAxis.valueMax)
+            )
             drawing.add(
                 String(
                     x_position - 7,
@@ -157,7 +167,9 @@ async def generate_pdf(session: DepDatabaseSession):
             )
 
         if inactive > 0:
-            y_position_inactive = line_chart.y + (inactive * (line_chart.height / 350))
+            y_position_inactive = line_chart.y + (
+                inactive * (line_chart.height / line_chart.yValueAxis.valueMax)
+            )
             drawing.add(
                 String(
                     x_position - 7,
