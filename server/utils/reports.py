@@ -47,6 +47,17 @@ except Exception as e:
 bucket_name = "client-bottle"
 
 
+def map_x(value, line_chart):
+    x_min = line_chart.xValueAxis.valueMin
+    x_max = line_chart.xValueAxis.valueMax
+    return line_chart.x + ((value - x_min) / (x_max - x_min)) * line_chart.width
+
+def map_y(value, line_chart):
+    y_min = line_chart.yValueAxis.valueMin
+    y_max = line_chart.yValueAxis.valueMax
+    return line_chart.y + ((value - y_min) / (y_max - y_min)) * line_chart.height
+
+
 async def generate_pdf(session: DepDatabaseSession):
     current_year = datetime.now().year
     current_month = datetime.now().month
@@ -146,38 +157,35 @@ async def generate_pdf(session: DepDatabaseSession):
     line_chart.xValueAxis.valueMax = last_day
     line_chart.xValueAxis.valueStep = 1
     line_chart.xValueAxis.labelTextFormat = "%d"
+    
     line_chart.yValueAxis.valueMin = 0
     line_chart.yValueAxis.valueMax = 350
     line_chart.yValueAxis.valueStep = 50
 
     for day, active, inactive in zip(days_in_month, active_counts, inactive_counts):
-        x_position = line_chart.x + ((day - 1) * (line_chart.width / (current_day - 1)))
+        x_position = map_x(day, line_chart)
 
         if active > 0:
-            y_position_active = line_chart.y + (
-                active * (line_chart.height / line_chart.yValueAxis.valueMax)
-            )
+            y_position_active = map_y(active, line_chart)
             drawing.add(
                 String(
-                    x_position - 7,
-                    y_position_active + 5,
+                    x_position - 8,
+                    y_position_active + 3,
                     str(active),
                     fillColor=colors.red,
                 )
             )
 
         if inactive > 0:
-            y_position_inactive = line_chart.y + (
-                inactive * (line_chart.height / line_chart.yValueAxis.valueMax)
-            )
+            y_position_inactive = map_y(inactive, line_chart)
             drawing.add(
                 String(
-                    x_position - 7,
-                    y_position_inactive + 5,
+                    x_position - 8,
+                    y_position_inactive + 3,
                     str(inactive),
                     fillColor=colors.blue,
                 )
-            )
+        )
 
     legend = Legend()
     legend.x = 440
